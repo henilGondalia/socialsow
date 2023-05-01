@@ -11,12 +11,12 @@ import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/user.js';
 import postRoutes from './routes/post.js';
-import register from './contollers/auth.js';
-import createPost from './contollers/auth.js';
+import {register} from './controllers/auth.js';
+// import createPost from './contollers/auth.js';
 import { verifyToken } from './middleware/auth.js';
-import User from "./models/User.js";
-import Post from "./models/Post.js";
-import {users, posts} from "./data"
+// import User from "./models/User.js";
+// import Post from "./models/Post.js";
+// import {users, posts} from "./data/index.js";
 
 /* Configuration */
 const __filename = fileURLToPath(import.meta.url);
@@ -45,7 +45,7 @@ const upload = multer({ storage });
 
 /* Routes with file */
 app.post('/auth/register', upload.single('picture'), register);
-app.post('/posts',verifyToken, upload.single('picture'), createPost);
+// app.post('/posts',verifyToken, upload.single('picture'), createPost);
 
 /* routes */
 app.use('/auth', authRoutes);

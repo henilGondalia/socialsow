@@ -40,7 +40,6 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    debugger;
     const { email, password } = req.body;
     const user = await User.findOne({ email: email });
     if (!user) return res.stauts(400).json({ msg: 'User does not exist.' });

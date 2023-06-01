@@ -80,7 +80,6 @@ const Form = () => {
   };
 
   const login = async (values, onSubmitProps) => {
-    debugger;
     const loggedInResponse = await fetch(`${configUrl}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

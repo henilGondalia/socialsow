@@ -17,7 +17,7 @@ export const createPost = async (req, res) => {
       comments: [],
     });
     await newPost.save();
-    const post = await Post.find();
+    const post = await Post.find().sort({ createdAt: -1 });
     res.status(201).json(post);
   } catch (err) {
     res.status(409).json({ message: err.message });
@@ -26,7 +26,7 @@ export const createPost = async (req, res) => {
 
 export const getFeedPosts = async (req, res) => {
   try {
-    const post = await Post.find();
+    const post = await Post.find().sort({ createdAt: -1 });
     res.status(200).json(post);
   } catch (err) {
     res.status(404).json({ message: err.message });
@@ -36,7 +36,7 @@ export const getFeedPosts = async (req, res) => {
 export const getUserPosts = async (req, res) => {
   try {
     const { userId } = req.params;
-    const post = await Post.find({ userId });
+    const post = await Post.find({ userId }).sort({ createdAt: -1 });
     res.status(200).json(post);
   } catch (err) {
     res.status(404).json({ message: err.message });
@@ -65,5 +65,40 @@ export const likePost = async (req, res) => {
     res.status(200).json(updatedPost);
   } catch (err) {
     res.status(404).json({ message: err.message });
+  }
+};
+
+export const commentPost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId, comment } = req.body;
+    const post = await Post.findById(id);
+    const newComment = {
+      userId: userId,
+      comment: comment,
+    };
+    console.log("newComment",req.body, newComment);
+  //  post.comments.push(newComment);
+
+    const updatedPost = await Post.findByIdAndUpdate(
+      id,
+      { $push: { comments: newComment } },
+      { new: true }
+    );
+
+    res.status(200).json(updatedPost);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
+export const deletePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const post = await Post.findByIdAndRemove(id);
+    res.status(200).json(post);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+    res.status(505).json({ message: "Failed to delete post" });
   }
 };

@@ -1,1 +1,2 @@
-export const configUrl = 'https://socialsow.onrender.com'
+export const configUrl = 'http://localhost:3001'
+// export const configUrl = 'https://socialsow.onrender.com'

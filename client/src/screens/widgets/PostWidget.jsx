@@ -104,7 +104,9 @@ const PostWidget = ({
           {comments.map((comment, i) => (
             <Comment
               userId={comment.userId}
+              commentId={comment._id}
               comment={comment.comment}
+              postId={postId}
               key={`${name}-${i}`}
             />
           ))}

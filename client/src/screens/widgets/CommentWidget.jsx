@@ -7,7 +7,7 @@ import SendIcon from "@mui/icons-material/Send";
 import { setPost } from "state";
 import { configUrl } from "config";
 
-const CommentWidget = ({ postId }) => {
+const CommentWidget = ({ postId, commentId }) => {
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const [comment, setComment] = useState("");
@@ -21,7 +21,11 @@ const CommentWidget = ({ postId }) => {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userId: _id, comment: comment }),
+      body: JSON.stringify({
+        userId: _id,
+        comment: comment,
+        parentCommentId: commentId,
+      }),
     });
     const updatedPost = await response.json();
     dispatch(setPost({ post: updatedPost }));

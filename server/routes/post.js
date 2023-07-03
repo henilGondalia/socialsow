@@ -13,7 +13,7 @@ const router = express.Router();
 router.get('/', verifyToken, getFeedPosts);
 router.get('/:userId/posts', verifyToken, getUserPosts);
 router.patch('/:id/like', verifyToken, likePost);
-router.patch('/:id/comment', verifyToken, commentPost);
+router.post('/:id/comment', verifyToken, commentPost);
 router.delete('/:id', verifyToken, deletePost);
 
 export default router;

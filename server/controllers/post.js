@@ -1,5 +1,6 @@
 import Post from '../models/Post.js';
 import User from "../models/User.js";
+import Comment from "../models/Comment.js";
 
 export const createPost = async (req, res) => {
   try {
@@ -71,21 +72,40 @@ export const likePost = async (req, res) => {
 export const commentPost = async (req, res) => {
   try {
     const { id } = req.params;
-    const { userId, comment } = req.body;
+    const { userId, comment, parentId} = req.body;
     const post = await Post.findById(id);
-    const newComment = {
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    let commentData = {
       userId: userId,
+      postId: id,
       comment: comment,
+      likes: {},
+      replies: [],
+      parentId: parentId ? parentId : undefined,
     };
-    console.log("newComment",req.body, newComment);
-  //  post.comments.push(newComment);
-
-    const updatedPost = await Post.findByIdAndUpdate(
-      id,
-      { $push: { comments: newComment } },
-      { new: true }
-    );
-
+    console.log("newComment",req.body, commentData);
+    const newComment = new Comment(commentData);
+    const savedComment = await newComment.save();
+    if (parentId) {
+      const parentComment = await Comment.findById(parentId);
+      if (!parentComment) {
+        return res.status(404).json({ message: 'Parent comment not found' });
+      }
+      parentComment.replies.push(savedComment._id);
+      await parentComment.save();
+    } else {
+      post.comments.push(savedComment);
+      await post.save();
+    }
+    // const updatedPost = await Post.findByIdAndUpdate(
+    //   id,
+    //   { $push: { comments: newComment } },
+    //   { new: true }
+    // );
+    const updatedPost = await Post.findById(id);
     res.status(200).json(updatedPost);
   } catch (err) {
     res.status(404).json({ message: err.message });
@@ -102,3 +122,4 @@ export const deletePost = async (req, res) => {
     res.status(505).json({ message: "Failed to delete post" });
   }
 };
+

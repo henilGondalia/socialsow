@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPosts } from "state";
 import PostWidget from "./PostWidget";
 import WidgetWrapper from "components/WidgetWrapper";
-import { Box, useMediaQuery, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { configUrl } from "config";
 
 const PostsWidget = ({ userId, page = false }) => {

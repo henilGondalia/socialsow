@@ -6,14 +6,14 @@ import { useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
 import UserImage from "./UserImage";
 import { configUrl } from "config";
-import CommentWidget from "../screens/widgets/CommentWidget";
+// import CommentWidget from "../screens/widgets/CommentWidget";
 
 const Comment = ({ userId, commentId, comment, postId, key }) => {
   const [user, setUser] = useState(null);
-  const [reply, setReply] = useState(null);
+  // const [reply, setReply] = useState(null);
   const navigate = useNavigate();
   const token = useSelector((state) => state.token);
-  const { _id } = useSelector((state) => state.user);
+  // const { _id } = useSelector((state) => state.user);
 
   const { palette } = useTheme();
   const main = palette.neutral.main;

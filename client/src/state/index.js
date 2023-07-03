@@ -42,10 +42,21 @@ export const authSlice = createSlice({
     UpdatePostAfterDelete: (state, action) => {
       const updatedPosts = state.posts.filter((post) => post._id !== action.payload.post._id );
       state.posts = updatedPosts;
-    }
+    },
+    setBookmarks: (state, action) => {
+      if (state.user) {
+        state.user.bookmarks = action.payload.bookmarks;
+      } else {
+        console.error('Bookmarks non-existent :(');
+      }
+    },
+    removeUnBookmarkedPost: (state, action) => {
+      const updatedPosts = state.posts.filter((post) => post._id !== action.payload.postId );
+      state.posts = updatedPosts;
+    },
   },
 });
 
-export const { setMode, setLogin, setLogout, setFriends, setPosts, setPost,UpdatePostAfterDelete } =
+export const { setMode, setLogin, setLogout, setFriends,setBookmarks, setPosts, setPost,UpdatePostAfterDelete,removeUnBookmarkedPost } =
   authSlice.actions;
 export default authSlice.reducer;

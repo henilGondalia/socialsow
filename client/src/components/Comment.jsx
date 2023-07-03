@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
 import UserImage from "./UserImage";
 import { configUrl } from "config";
-// import CommentWidget from "../screens/widgets/CommentWidget";
+import CommentWidget from "../screens/widgets/CommentWidget";
 
 const Comment = ({ userId, commentId, comment, postId, key }) => {
   const [user, setUser] = useState(null);
@@ -38,7 +38,7 @@ const Comment = ({ userId, commentId, comment, postId, key }) => {
 
   return (
     <>
-      <FlexBetween gap="1.5rem" key={key}>
+      <FlexBetween gap="1.5rem" key={key} sx={{ paddingBottom: "0.75rem" }}>
         <UserImage image={user.picturePath} size="45px" />
         <Box
           sx={{

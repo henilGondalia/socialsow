@@ -4,6 +4,8 @@ import {
   FavoriteOutlined,
   ShareOutlined,
 } from "@mui/icons-material";
+import BookmarkAddOutlinedIcon from "@mui/icons-material/BookmarkAddOutlined";
+import BookmarkAddedIcon from "@mui/icons-material/BookmarkAdded";
 import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
@@ -12,7 +14,7 @@ import CommentWidget from "./CommentWidget";
 import Comment from "components/Comment";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setPost } from "state";
+import { setPost, removeUnBookmarkedPost, setBookmarks } from "state";
 import { configUrl } from "config";
 
 const PostWidget = ({
@@ -25,11 +27,13 @@ const PostWidget = ({
   userPicturePath,
   likes,
   comments,
+  page,
 }) => {
   const [isComments, setIsComments] = useState(false);
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const loggedInUserId = useSelector((state) => state.user._id);
+  const bookmarkedPosts = useSelector((state) => state.user.bookmarks);
   const isLiked = Boolean(likes[loggedInUserId]);
   const likeCount = Object.keys(likes).length;
 
@@ -50,6 +54,29 @@ const PostWidget = ({
     dispatch(setPost({ post: updatedPost }));
   };
 
+  const bookMarkPost = async () => {
+    const response = await fetch(
+      `${configUrl}/users/${loggedInUserId}/bookmark`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: loggedInUserId, postId: postId }),
+      }
+    );
+    const updatedBookMark = await response.json();
+    if (page === "isSaved") {
+      dispatch(removeUnBookmarkedPost({ postId: postId }));
+    }
+    dispatch(setBookmarks({ bookmarks: updatedBookMark }));
+  };
+
+  const isPostBookmarked = (postId) => {
+    return bookmarkedPosts.includes(postId);
+  };
+  console.log("sds userBookaMarks", bookmarkedPosts);
   return (
     <WidgetWrapper m="2rem 0">
       <Friend
@@ -91,6 +118,14 @@ const PostWidget = ({
             </IconButton>
             <Typography>{comments.length}</Typography>
           </FlexBetween>
+
+          <IconButton onClick={bookMarkPost}>
+            {isPostBookmarked(postId) ? (
+              <BookmarkAddedIcon />
+            ) : (
+              <BookmarkAddOutlinedIcon />
+            )}
+          </IconButton>
         </FlexBetween>
 
         <IconButton>

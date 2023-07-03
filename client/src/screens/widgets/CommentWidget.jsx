@@ -16,7 +16,7 @@ const CommentWidget = ({ postId, commentId }) => {
 
   const handleComment = async () => {
     const response = await fetch(`${configUrl}/posts/${postId}/comment`, {
-      method: "PATCH",
+      method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -24,7 +24,7 @@ const CommentWidget = ({ postId, commentId }) => {
       body: JSON.stringify({
         userId: _id,
         comment: comment,
-        parentCommentId: commentId,
+        parentId: commentId,
       }),
     });
     const updatedPost = await response.json();

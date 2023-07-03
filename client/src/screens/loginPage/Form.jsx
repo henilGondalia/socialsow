@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Box,
   Button,
+  CircularProgress,
   TextField,
   useMediaQuery,
   Typography,
@@ -55,9 +56,11 @@ const Form = () => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const isLogin = pageType === "login";
   const isRegister = pageType === "register";
+  const [isLoading, setIsLoading] = useState(false);
 
   const register = async (values, onSubmitProps) => {
     // this allows us to send form info with image
+    setIsLoading(true);
     const formData = new FormData();
     for (let value in values) {
       formData.append(value, values[value]);
@@ -69,6 +72,7 @@ const Form = () => {
       body: formData,
     });
     const savedUser = await savedUserResponse.json();
+    setIsLoading(false);
     onSubmitProps.resetForm();
 
     if (savedUser) {
@@ -77,12 +81,14 @@ const Form = () => {
   };
 
   const login = async (values, onSubmitProps) => {
+    setIsLoading(true);
     const loggedInResponse = await fetch(`${configUrl}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(values),
     });
     const loggedIn = await loggedInResponse.json();
+    setIsLoading(false);
     onSubmitProps.resetForm();
     if (loggedIn) {
       dispatch(
@@ -243,7 +249,13 @@ const Form = () => {
                 "&:hover": { color: palette.primary.main },
               }}
             >
-              {isLogin ? "LOGIN" : "REGISTER"}
+              {isLoading ? (
+                <CircularProgress color="inherit" size={24} /> // Show the loader while loading
+              ) : isLogin ? (
+                "LOGIN"
+              ) : (
+                "REGISTER"
+              )}
             </Button>
             {isLogin && (
               <Typography style={{ textAlign: "center" }}>

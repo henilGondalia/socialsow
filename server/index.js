@@ -11,10 +11,13 @@ import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/user.js';
 import postRoutes from './routes/post.js';
+import chatRoutes from './routes/chat.js';
 import {register} from './controllers/auth.js';
 import {createPost} from './controllers/post.js';
 import { verifyToken } from './middleware/auth.js';
-// import User from "./models/User.js";
+import WebSocket, { WebSocketServer }  from "ws";
+import jwt from 'jsonwebtoken';
+import User from "./models/User.js";
 // import Post from "./models/Post.js";
 // import {users, posts} from "./data/index.js";
 
@@ -54,9 +57,22 @@ app.post('/posts',verifyToken, upload.single('picture'), createPost);
 app.use('/auth', authRoutes);
 app.use('/users',userRoutes);
 app.use('/posts',postRoutes);
+app.use('/chat',chatRoutes);
 
 /*mongos setup */
 const PORT = process.env.PORT || 6001;
+const verifyUserToken = async (authorization) => {
+  let token = authorization;
+  if (!token) {
+    return;
+  }
+  if (token.startsWith('Bearer ')) {
+    token = token.slice(7).trimLeft();
+  }
+  const verified = jwt.verify(token, process.env.JWT_SECRET)
+  const user = await User.findById(verified.id);
+  return user;
+}
 mongoose.set('strictQuery', false);
 mongoose
   .connect(process.env.MONGO_URL, {
@@ -64,7 +80,26 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
+    const server = app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
+    const wss = new WebSocketServer({server})
+    wss.on('connection', async(socket, req) => {
+      const encodedHeaders = req.url.split('/')[1];
+      const headers = JSON.parse(atob(encodedHeaders));
+      const user = await verifyUserToken(headers['Authorization']);
+      // console.log(user);
+      if(user){
+        socket.userId = user._id;
+        socket.userName = `${user.firstName} ${user.lastName}`;
+        [...wss.clients].forEach(client => {
+          client.send(JSON.stringify(
+            [...wss.clients].map((c) => {return { userId: c.userId, userName: c.userName }})
+          ))
+        })
+      }else {
+        socket.close(403, 'Access Denied');
+        return;
+      }
+    });
 
     /* Add dummy data */
     // User.insertMany(users);

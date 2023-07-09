@@ -46,10 +46,35 @@ export const login = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials.' });
-    
+
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
     delete user.password;
     res.status(200).json({ token, user });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const updatePassword = async (req, res) => {
+  try {
+    const {
+      userId,
+      password,
+    } = req.body;
+
+    const salt = await bcrypt.genSalt();
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        password: passwordHash,
+      },
+      {
+        new: true,
+      }
+    )
+    res.status(201).json(updatedUser);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

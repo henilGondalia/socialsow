@@ -10,6 +10,25 @@ export const getUser = async (req, res) => {
     res.status(404).json({ message: err.message });
   }
 };
+export const getUsers = async (req, res) => {
+  try {
+    // const { id } = req.params;
+    const keyword = req.query.search
+      ? {
+        $or: [
+          { firstName: { $regex: req.query.search, $options: "i" } },
+          { lastName: { $regex: req.query.search, $options: "i" } },
+          { email: { $regex: req.query.search, $options: "i" } },
+        ],
+      }
+      : {};
+
+    const users = await User.find(keyword).find({ _id: { $ne: req.user.id } });
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
 
 export const getUserFriends = async (req, res) => {
   try {
@@ -69,12 +88,12 @@ export const bookmarkPost = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    console.log("isBookmarked>>>",user.bookmarks, user.bookmarks.includes(postId))
+    console.log("isBookmarked>>>", user.bookmarks, user.bookmarks.includes(postId))
     // Check if the post is already bookmarked by the user
     const isBookmarked = user.bookmarks.includes(postId);
     if (isBookmarked) {
       user.bookmarks.pull(postId);
-    }else {
+    } else {
       user.bookmarks.push(postId);
     }
     const savedUser = await user.save();
@@ -90,12 +109,12 @@ export const getBookmarkedPosts = async (req, res) => {
     const { userId } = req.params;
     // Find the user by userId
     const user = await User.findById(userId);
-    
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
-    console.log(userId,user)
+
+    console.log(userId, user)
     // Retrieve the bookmarked posts for the user
     const bookmarkedPosts = await Post.find({ _id: { $in: user.bookmarks } });
     console.log(bookmarkedPosts)

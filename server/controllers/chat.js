@@ -1,5 +1,6 @@
 import Chat from '../models/Chat.js';
 import User from "../models/User.js";
+import Message from "../models/Message.js";
 
 export const fetchChat = async (req, res) => {
     try {
@@ -25,7 +26,7 @@ export const accessChat = async (req, res) => {
         let chat = await Chat.find({
             isGroupChat: false,
             $and: [
-                { users: { $elemMatch: { $eq: req.user._id } } },
+                { users: { $elemMatch: { $eq: req.user.id } } },
                 { users: { $elemMatch: { $eq: userId } } },
             ],
         }).populate("users", "-password").populate("latestMessage");
@@ -67,11 +68,12 @@ export const createGroupChat = async (req, res) => {
     if (!req.body.users || !req.body.name) {
         return res.status(400).send({ message: "Please Fill all the feilds" });
     }
-    var users = JSON.parse(req.body.users);
+    // var users = JSON.parse(req.body.users);
+    var users = req.body.users;
     if (users.length < 2) {
         return res
             .status(400)
-            .send("More than 2 users are required to form a group chat");
+            .json({ message: "More than 2 users are required to form a group chat" });
     }
     users.push(req.user.id);
     try {
@@ -161,6 +163,41 @@ export const removeFromGroup = async (req, res) => {
             .populate("groupAdmin", "-password");
 
         res.status(200).json(removed);
+    } catch (error) {
+        res.status(400).json({ message: err.message });
+    }
+}
+
+export const sendMessage = async (req, res) => {
+    try {
+        const { chatId, content } = req.body;
+
+        var newMessage = {
+            sender: req.user.id,
+            content: content,
+            chat: chatId,
+        };
+        var message = await Message.create(newMessage);
+        message = await message.populate("sender", "firstName lastName picturePath");
+        message = await message.populate("chat");
+        message = await User.populate(message, {
+            path: "chat.users",
+            select: "firstName lastName picturePath email",
+        });
+
+        await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message });
+        res.status(200).json(message);
+    } catch (error) {
+        res.status(400).json({ message: err.message });
+    }
+}
+
+export const fetchAllMessages = async (req, res) => {
+    try {
+        const messages = await Message.find({ chat: req.params.chatId })
+            .populate("sender", "firstName lastName picturePath email")
+            .populate("chat");
+        res.status(200).json(messages);
     } catch (error) {
         res.status(400).json({ message: err.message });
     }

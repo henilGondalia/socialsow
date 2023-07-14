@@ -8,3 +8,36 @@ body,
   width: 100%;
   font-family: "Rubik", sans-serif;
 }
+
+/* scrollbar ------------------------- */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent;
+  scroll-behavior: smooth;
+}
+
+/* Chrome, Edge and Safari */
+*::-webkit-scrollbar {
+  width: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  border-radius: 5px;
+  background-color: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 80px;
+  background-color: #00353F;
+  /* border: 1.5px solid #fff; */
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: transparent;
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background-color: transparent;
+}

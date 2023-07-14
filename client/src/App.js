@@ -3,6 +3,7 @@ import HomePage from 'screens/homePage';
 import LoginPage from 'screens/loginPage';
 import ProfilePage from 'screens/profilePage';
 import SavedPage from 'screens/savedPage';
+import MessagePage from 'screens/messagePage';
 import { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { CssBaseline, ThemeProvider } from "@mui/material";
@@ -32,6 +33,10 @@ function App() {
              <Route
               path="/saved/:userId"
               element={isAuth ? <SavedPage /> : <Navigate to="/" />}
+            />
+            <Route
+              path="/messages/:userId"
+              element={isAuth ? <MessagePage /> : <Navigate to="/" />}
             />
           </Routes>
         </ThemeProvider>

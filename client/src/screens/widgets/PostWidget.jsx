@@ -76,7 +76,6 @@ const PostWidget = ({
   const isPostBookmarked = (postId) => {
     return bookmarkedPosts.includes(postId);
   };
-  console.log("sds userBookaMarks", bookmarkedPosts);
   return (
     <WidgetWrapper m="2rem 0">
       <Friend

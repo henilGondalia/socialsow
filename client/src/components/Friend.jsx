@@ -47,7 +47,6 @@ const Friend = ({ friendId, name, subtitle, userPicturePath, postId }) => {
       },
     });
     const data = await response.json();
-    console.log(data);
     dispatch(UpdatePostAfterDelete({ post: data }));
   };
 

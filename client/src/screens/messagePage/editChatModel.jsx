@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   Box,
-  Typography,
-  IconButton,
   useTheme,
   Divider,
   TextField,
@@ -11,7 +9,6 @@ import {
   Button,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import Diversity3Icon from "@mui/icons-material/Diversity3";
 import SearchBar from "components/SearchBar";
 import MyChats from "components/MyChats";
 import MyChatSkelton from "components/MyChatSkelton";
@@ -70,12 +67,12 @@ const EditChatModel = ({
   useEffect(() => {
     console.log("selectedChat", selectedChat);
     selectedChat.users && seGroup(selectedChat.users);
-    setGroupName("");
-    setSearchResult([]);
-    return () => {
-      console.log("return");
-    };
-  }, [editChat]);
+    //   setGroupName("");
+    //   setSearchResult([]);
+    //   return () => {
+    //     console.log("return");
+    //   };
+  }, [editChat, selectedChat, seGroup]);
 
   return (
     <ModelWrapper
@@ -149,7 +146,7 @@ const EditChatModel = ({
           </Box>
           <Button
             disabled={!groupName}
-            onClick={() => updateGroupChat(groupName)}
+            onClick={() => updateGroupChat(groupName, selectedChat._id)}
             sx={{
               color: palette.background.alt,
               backgroundColor: palette.primary.main,

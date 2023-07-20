@@ -1,4 +1,4 @@
-import { Box, Divider, Skeleton, useTheme } from "@mui/material";
+import { Box, Divider, Skeleton } from "@mui/material";
 import FlexBetween from "./FlexBetween";
 
 const MyChatSkelton = ({ customPadding = "16px" }) => {

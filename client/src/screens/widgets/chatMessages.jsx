@@ -1,14 +1,16 @@
 import ScrollableFeed from "react-scrollable-feed";
 import { useSelector } from "react-redux";
-import { Box } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
+import TypingLoader from "components/TypingLoader";
 
-const ChatMessages = ({ messages }) => {
+const ChatMessages = ({ messages, isTyping }) => {
   const _id = useSelector((state) => state.user._id);
+  const { palette } = useTheme();
 
   const isSameUser = (messages, message, index) => {
     // console.log(i === messages.length - 1);
     return (
-      index != 0 &&
+      index !== 0 &&
       index - 1 >= 0 &&
       messages[index - 1].sender._id === message.sender._id
     );
@@ -30,7 +32,10 @@ const ChatMessages = ({ messages }) => {
             <span
               style={{
                 backgroundColor: `${
-                  message.sender._id === _id ? "#BEE3F8" : "#B9F5D0"
+                  // message.sender._id === _id ? "#BEE3F8" : "#B9F5D0"
+                  message.sender._id === _id
+                    ? palette.primary.light
+                    : palette.primary.main
                 }`,
                 marginTop: isSameUser(messages, message, index)
                   ? "3px"
@@ -44,6 +49,7 @@ const ChatMessages = ({ messages }) => {
             </span>
           </Box>
         ))}
+      {isTyping && <TypingLoader />}
     </ScrollableFeed>
   );
 };

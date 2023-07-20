@@ -1,14 +1,12 @@
 import {
   Box,
-  useMediaQuery,
   Typography,
   Button,
   InputBase,
   IconButton,
   useTheme,
-  Divider,
 } from "@mui/material";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import WidgetWrapper from "components/WidgetWrapper";
 import FlexBetween from "components/FlexBetween";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -19,21 +17,86 @@ import MyChats from "components/MyChats";
 import { useState, useEffect } from "react";
 import { configUrl } from "config";
 import ChatMessages from "./chatMessages";
+import io from "socket.io-client";
+import { setNotification } from "state";
+
+let socket, selectedChatCompare;
 
 const ChatBoxWidget = ({ selectedChat, setNewChatOpen, setEditChat }) => {
+  const dispatch = useDispatch();
   const { palette } = useTheme();
   const token = useSelector((state) => state.token);
-  const _id = useSelector((state) => state.user._id);
+  const user = useSelector((state) => state.user);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState([]);
+  const [soketConnected, setSoketConnected] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [fetchAgain, setFetchAgain] = useState(false);
+  const notifications = useSelector((state) => state.notifications);
 
   const getSender = (users) => {
-    return users[0]._id === _id ? users[1] : users[0];
+    return users[0]._id === user._id ? users[1] : users[0];
   };
+
+  useEffect(() => {
+    socket = io(configUrl);
+    socket.emit("setup", user);
+    socket.on("connected", () => setSoketConnected(true));
+    socket.on("typing", () => setIsTyping(true));
+    socket.on("stopTyping", () => setIsTyping(false));
+  }, [user]);
+
+  console.log("------------", notifications);
+
+  useEffect(() => {
+    socket.on("messageRecieved", (newMessageRecieved) => {
+      if (
+        !selectedChatCompare ||
+        selectedChatCompare._id !== newMessageRecieved.chat._id
+      ) {
+        const exists = notifications.some(
+          (notification) =>
+            JSON.stringify(notification) === JSON.stringify(newMessageRecieved)
+        );
+        if (!exists) {
+          dispatch(
+            setNotification({
+              notifications: [newMessageRecieved, ...notifications],
+            })
+          );
+          setFetchAgain(!fetchAgain);
+        }
+      } else {
+        setMessages([...messages, newMessageRecieved]);
+      }
+    });
+  });
+
+  useEffect(() => {
+    fetchMessages();
+    selectedChatCompare = selectedChat;
+    // eslint-disable-next-line
+  }, [selectedChat, fetchAgain]);
 
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
+    if (!soketConnected) return false;
+    if (!typing) {
+      setTyping(true);
+      socket.emit("typing", selectedChat._id);
+    }
+    let lastTypingTime = new Date().getTime();
+    let timerLength = 4000;
+    setTimeout(() => {
+      let timeNow = new Date().getTime();
+      let timeDiff = timeNow - lastTypingTime;
+      if (timeDiff >= timerLength && typing) {
+        socket.emit("stopTyping", selectedChat._id);
+        setTyping(false);
+      }
+    }, timerLength);
   };
 
   const fetchMessages = async () => {
@@ -54,12 +117,15 @@ const ChatBoxWidget = ({ selectedChat, setNewChatOpen, setEditChat }) => {
       const data = await response.json();
       setMessages(data);
       setLoading(false);
+
+      socket.emit("joinChat", selectedChat._id);
     } catch (error) {}
   };
 
   const sendMessage = async (event) => {
     if (event.key === "Enter" && newMessage) {
-      debugger;
+      socket.on("stopTyping", selectedChat._id);
+      setTyping(false);
       try {
         const response = await fetch(`${configUrl}/chat/message`, {
           method: "POST",
@@ -74,7 +140,7 @@ const ChatBoxWidget = ({ selectedChat, setNewChatOpen, setEditChat }) => {
         });
         setNewMessage("");
         const data = await response.json();
-        //       socket.emit("new message", data);
+        socket.emit("newMessage", data);
         setMessages([...messages, data]);
       } catch (error) {
         <Snackbar
@@ -88,18 +154,18 @@ const ChatBoxWidget = ({ selectedChat, setNewChatOpen, setEditChat }) => {
     }
   };
 
-  useEffect(() => {
-    fetchMessages();
-
-    // eslint-disable-next-line
-  }, [selectedChat]);
-
   return (
     <WidgetWrapper height="100%">
-      <Box height="calc(100vh - 13rem )" sx={{ overflowY: "scroll" }}>
+      <Box
+        sx={{
+          "& *::-webkit-scrollbar-thumb": {
+            backgroundColor: "transparent",
+          },
+        }}
+      >
         {selectedChat ? (
           <>
-            <Box>
+            <Box sx={{ position: "absolute", width: "93%", top: "0" }}>
               <MyChats
                 chat={selectedChat}
                 name={
@@ -118,7 +184,7 @@ const ChatBoxWidget = ({ selectedChat, setNewChatOpen, setEditChat }) => {
                 size="35px"
               />
             </Box>
-            <Box>
+            <Box height="calc(100vh - 14rem )">
               {loading ? (
                 <Box
                   position="absolute"
@@ -129,14 +195,12 @@ const ChatBoxWidget = ({ selectedChat, setNewChatOpen, setEditChat }) => {
                   <CircularProgress />
                 </Box>
               ) : (
-                <ChatMessages messages={messages} />
+                <ChatMessages messages={messages} isTyping={isTyping} />
               )}
             </Box>
+
             <Box position="absolute" width="90%" bottom="1rem">
               <FlexBetween gap="0.1rem">
-                <IconButton>
-                  <SentimentSatisfiedAltRoundedIcon />
-                </IconButton>
                 <InputBase
                   placeholder="Send a message..."
                   onChange={(e) => typingHandler(e)}
@@ -149,6 +213,9 @@ const ChatBoxWidget = ({ selectedChat, setNewChatOpen, setEditChat }) => {
                   }}
                   onKeyDown={sendMessage}
                 />
+                <IconButton>
+                  <SentimentSatisfiedAltRoundedIcon />
+                </IconButton>
                 {/* <IconButton onClick={() => console.log("sent")}>
                   <SendIcon />
                 </IconButton> */}

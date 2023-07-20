@@ -1,7 +1,6 @@
 # <div align='center'>![SocialSowLogo](https://github.com/henilGondalia/socialsow/assets/34880491/a0ea800f-a05b-4ab7-a69c-afd55f260ec0)</div>
 
-
-SocialSow is a project inspired by [ED Roh's tutorial](https://youtu.be/K8YELRmUb5o). It serves as a starting point for building a social media application. To see a live [demo](https://socialsow.netlify.app/). 
+SocialSow is a project inspired by [ED Roh's tutorial](https://youtu.be/K8YELRmUb5o). It serves as a starting point for building a social media application. To see a live [demo](https://socialsow.netlify.app/).
 
 ## Tech Stack
 

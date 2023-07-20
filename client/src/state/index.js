@@ -5,6 +5,7 @@ const initialState = {
   user: null,
   token: null,
   posts: [],
+  notifications: []
 };
 
 export const authSlice = createSlice({
@@ -40,7 +41,7 @@ export const authSlice = createSlice({
       state.posts = updatedPosts;
     },
     UpdatePostAfterDelete: (state, action) => {
-      const updatedPosts = state.posts.filter((post) => post._id !== action.payload.post._id );
+      const updatedPosts = state.posts.filter((post) => post._id !== action.payload.post._id);
       state.posts = updatedPosts;
     },
     setBookmarks: (state, action) => {
@@ -51,12 +52,15 @@ export const authSlice = createSlice({
       }
     },
     removeUnBookmarkedPost: (state, action) => {
-      const updatedPosts = state.posts.filter((post) => post._id !== action.payload.postId );
+      const updatedPosts = state.posts.filter((post) => post._id !== action.payload.postId);
       state.posts = updatedPosts;
     },
+    setNotification: (state, action) => {
+      state.notifications = action.payload.notifications
+    }
   },
 });
 
-export const { setMode, setLogin, setLogout, setFriends,setBookmarks, setPosts, setPost,UpdatePostAfterDelete,removeUnBookmarkedPost } =
+export const { setMode, setLogin, setLogout, setFriends, setBookmarks, setPosts, setPost, UpdatePostAfterDelete, removeUnBookmarkedPost, setNotification } =
   authSlice.actions;
 export default authSlice.reducer;

@@ -12,10 +12,10 @@ import authRoutes from './routes/auth.js';
 import userRoutes from './routes/user.js';
 import postRoutes from './routes/post.js';
 import chatRoutes from './routes/chat.js';
-import {register} from './controllers/auth.js';
-import {createPost} from './controllers/post.js';
+import { register } from './controllers/auth.js';
+import { createPost } from './controllers/post.js';
 import { verifyToken } from './middleware/auth.js';
-import WebSocket, { WebSocketServer }  from "ws";
+import { Server } from "socket.io";
 import jwt from 'jsonwebtoken';
 import User from "./models/User.js";
 // import Post from "./models/Post.js";
@@ -51,13 +51,13 @@ const upload = multer({ storage });
 
 /* Routes with file */
 app.post('/auth/register', upload.single('picture'), register);
-app.post('/posts',verifyToken, upload.single('picture'), createPost);
+app.post('/posts', verifyToken, upload.single('picture'), createPost);
 
 /* routes */
 app.use('/auth', authRoutes);
-app.use('/users',userRoutes);
-app.use('/posts',postRoutes);
-app.use('/chat',chatRoutes);
+app.use('/users', userRoutes);
+app.use('/posts', postRoutes);
+app.use('/chat', chatRoutes);
 
 /*mongos setup */
 const PORT = process.env.PORT || 6001;
@@ -81,26 +81,43 @@ mongoose
   })
   .then(() => {
     const server = app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
-    const wss = new WebSocketServer({server})
-    wss.on('connection', async(socket, req) => {
-      const encodedHeaders = req.url.split('/')[1];
-      const headers = JSON.parse(atob(encodedHeaders));
-      const user = await verifyUserToken(headers['Authorization']);
-      // console.log(user);
-      if(user){
-        socket.userId = user._id;
-        socket.userName = `${user.firstName} ${user.lastName}`;
-        [...wss.clients].forEach(client => {
-          client.send(JSON.stringify(
-            [...wss.clients].map((c) => {return { userId: c.userId, userName: c.userName }})
-          ))
-        })
-      }else {
-        socket.close(403, 'Access Denied');
-        return;
-      }
-    });
+    const io = new Server(server, {
+      pingTimeout: 60000,
+      cors: {
+        origin: "http://localhost:3000",
+      },
+    })
+    io.on("connection", (socket) => {
+      console.log("Connected to socket.io");
 
+      socket.on("setup", (userData) => {
+        socket.join(userData._id);
+        socket.emit("connected")
+      })
+
+      socket.on("joinChat", (room) => {
+        socket.join(room);
+        console.log("user Join room:", room)
+      })
+
+      socket.on("typing", (room) => socket.in(room).emit("typing"))
+      socket.on("stopTyping", (room) => socket.in(room).emit("stopTyping"))
+
+      socket.on("newMessage", (newMessageRecieved) => {
+        let chat = newMessageRecieved.chat;
+        if (!chat.users) return console.log("Chat user are not defined")
+
+        chat.users.forEach(user => {
+          if (user._id == newMessageRecieved.sender._id) return;
+          socket.in(user._id).emit("messageRecieved", newMessageRecieved)
+        });
+      })
+
+      socket.off("setup", () => {
+        console.log("USER DISCONNECTED");
+        socket.leave(useData._id);
+      })
+    });
     /* Add dummy data */
     // User.insertMany(users);
     // Post.insertMany(posts);

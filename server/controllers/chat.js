@@ -64,7 +64,7 @@ export const accessChat = async (req, res) => {
     }
 };
 
-export const createGroupChat = async (req, res) => {
+export const accessGroupChat = async (req, res) => {
     if (!req.body.users || !req.body.name) {
         return res.status(400).send({ message: "Please Fill all the feilds" });
     }
@@ -75,20 +75,52 @@ export const createGroupChat = async (req, res) => {
             .status(400)
             .json({ message: "More than 2 users are required to form a group chat" });
     }
-    users.push(req.user.id);
     try {
-        const groupChat = await Chat.create({
-            chatName: req.body.name,
-            users: users,
-            isGroupChat: true,
-            groupAdmin: req.user.id,
-        });
+        if (req.body.chatId) {
+            const chat = await Chat.findById(req.body.chatId);
+            if (!chat) {
+                return res.status(404).json({ message: "Chat not found" });
+            }
 
-        const fullGroupChat = await Chat.findOne({ _id: groupChat._id })
-            .populate("users", "-password")
-            .populate("groupAdmin", "-password");
+            // Check if the user is a group admin
+            if (chat.groupAdmin.equals(req.user.id)) {
+                return res.status(403).json({ message: "Cannot update group chat. User is not authorized." });
+            }
 
-        res.status(200).json(fullGroupChat);
+            const updatedChat = await Chat.findByIdAndUpdate(
+                req.body.chatId,
+                {
+                    chatName: req.body.name,
+                    users: users,
+                },
+                {
+                    new: true,
+                }
+            )
+                .populate("users", "-password")
+                .populate("groupAdmin", "-password");
+
+            if (!updatedChat) {
+                return res.status(404).json({ message: "Update failed" });
+            }
+
+            res.status(200).json(updatedChat);
+        } else {
+            users.push(req.user.id);
+
+            const groupChat = await Chat.create({
+                chatName: req.body.name,
+                users: users,
+                isGroupChat: true,
+                groupAdmin: req.user.id,
+            });
+
+            const fullGroupChat = await Chat.findOne({ _id: groupChat._id })
+                .populate("users", "-password")
+                .populate("groupAdmin", "-password");
+
+            res.status(200).json(fullGroupChat);
+        }
     } catch (error) {
         res.status(400).json({ message: err.message });
     }

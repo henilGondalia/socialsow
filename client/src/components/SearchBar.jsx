@@ -1,17 +1,6 @@
-import React, { useEffect, useState } from "react";
-import {
-  Box,
-  useMediaQuery,
-  Typography,
-  Modal,
-  InputBase,
-  IconButton,
-  useTheme,
-  Divider,
-} from "@mui/material";
+import React from "react";
+import { InputBase, IconButton, useTheme } from "@mui/material";
 import { Search } from "@mui/icons-material";
-import Diversity3Icon from "@mui/icons-material/Diversity3";
-import CloseIcon from "@mui/icons-material/Close";
 import FlexBetween from "./FlexBetween";
 
 const SearchBar = ({ onSearch }) => {

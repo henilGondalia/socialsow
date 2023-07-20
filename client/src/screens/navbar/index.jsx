@@ -9,9 +9,9 @@ import {
   FormControl,
   useTheme,
   useMediaQuery,
+  Badge,
 } from "@mui/material";
 import {
-  Search,
   Message,
   DarkMode,
   LightMode,
@@ -25,12 +25,16 @@ import { setMode, setLogout } from "state";
 import { useNavigate } from "react-router-dom";
 import FlexBetween from "components/FlexBetween";
 import SearchBar from "components/SearchBar";
+import BasicMenu from "components/BasicMenu";
 
 const Navbar = () => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false);
+  const [anchorNotofication, setAnchorNotofication] = useState(null);
+  const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
+  const notifications = useSelector((state) => state.notifications);
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
 
   const theme = useTheme();
@@ -41,6 +45,15 @@ const Navbar = () => {
   const alt = theme.palette.background.alt;
 
   const fullName = `${user.firstName} ${user.lastName}`;
+
+  const handleOpen = (event) => {
+    setAnchorNotofication(event.currentTarget);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   return (
     <FlexBetween padding="1rem 6%" backgroundColor={alt}>
@@ -75,7 +88,17 @@ const Navbar = () => {
           <IconButton onClick={() => navigate(`/messages/${user._id}`)}>
             <Message sx={{ fontSize: "25px" }} />
           </IconButton>
-          <Notifications sx={{ fontSize: "25px" }} />
+          <IconButton anchorel={anchorNotofication} onClick={handleOpen}>
+            <Badge badgeContent={notifications.length} color="primary">
+              <Notifications sx={{ fontSize: "25px" }} />
+            </Badge>
+          </IconButton>
+          <BasicMenu
+            open={open}
+            anchorEl={anchorNotofication}
+            handleClose={handleClose}
+            notifications={notifications}
+          />
           <Help sx={{ fontSize: "25px" }} />
           <FormControl variant="standard" value={fullName}>
             <Select
@@ -152,8 +175,20 @@ const Navbar = () => {
                 <LightMode sx={{ color: dark, fontSize: "25px" }} />
               )}
             </IconButton>
-            <Message sx={{ fontSize: "25px" }} />
-            <Notifications sx={{ fontSize: "25px" }} />
+            <IconButton onClick={() => navigate(`/messages/${user._id}`)}>
+              <Message sx={{ fontSize: "25px" }} />
+            </IconButton>
+            <IconButton anchorel={anchorNotofication} onClick={handleOpen}>
+              <Badge badgeContent={notifications.length} color="secondary">
+                <Notifications sx={{ fontSize: "25px" }} />
+              </Badge>
+            </IconButton>
+            <BasicMenu
+              open={open}
+              anchorEl={anchorNotofication}
+              handleClose={handleClose}
+              notifications={notifications}
+            />
             <Help sx={{ fontSize: "25px" }} />
             <FormControl variant="standard" value={fullName}>
               <Select

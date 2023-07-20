@@ -1,11 +1,4 @@
-import {
-  Box,
-  Typography,
-  Divider,
-  InputBase,
-  IconButton,
-  useTheme,
-} from "@mui/material";
+import { Box, Typography, Divider, IconButton, useTheme } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { useSelector } from "react-redux";
 import FlexBetween from "../../components/FlexBetween";

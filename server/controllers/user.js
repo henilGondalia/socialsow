@@ -88,7 +88,6 @@ export const bookmarkPost = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    console.log("isBookmarked>>>", user.bookmarks, user.bookmarks.includes(postId))
     // Check if the post is already bookmarked by the user
     const isBookmarked = user.bookmarks.includes(postId);
     if (isBookmarked) {

@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  useMediaQuery,
-  Typography,
-  Modal,
-  InputBase,
-  IconButton,
-  useTheme,
-  Divider,
-} from "@mui/material";
+import { Box, useMediaQuery } from "@mui/material";
 import { useSelector } from "react-redux";
 import Navbar from "screens/navbar";
 import MyChatsWidget from "screens/widgets/MyChatsWidget";
@@ -60,32 +51,44 @@ const MessagePage = () => {
     }
   };
 
-  const accessGroupChat = async (groupName) => {
+  const accessGroupChat = async (groupName, chatId = undefined) => {
     if (groupName) {
+      let body = {
+        name: groupName,
+        users: group.map((member) => {
+          return member._id;
+        }),
+      };
+      if (chatId) {
+        body["chatId"] = chatId;
+      }
       const response = await fetch(`${configUrl}/chat/group`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: groupName,
-          users: group.map((member) => {
-            return member._id;
-          }),
-        }),
+        body: JSON.stringify(body),
       });
       const data = await response.json();
-      setChats([data, ...chats]);
+      if (chats.find((c) => c._id === data._id)) {
+        const updateChatIndex = chats.findIndex((c) => c._id === data._id);
+        let newChats = chats;
+        newChats[updateChatIndex] = data;
+        setChats([...newChats]);
+      } else {
+        setChats([data, ...chats]);
+      }
       setSelectedChat(data);
       setNewChatOpen(false);
+      setEditChat(false);
     }
   };
 
-  const updateGroupChat = async () => {};
-
   const handleGroup = (chat) => {
-    if (!group.filter((member) => member._id === chat._id)) {
+    debugger;
+    const isAvailable = group.filter((member) => member._id === chat._id);
+    if (!isAvailable.length) {
       seGroup([...group, chat]);
     }
   };
@@ -162,7 +165,7 @@ const MessagePage = () => {
           seGroup={seGroup}
           accessChat={handleGroup}
           handleDelete={handleDelete}
-          updateGroupChat={updateGroupChat}
+          updateGroupChat={accessGroupChat}
         />
       )}
     </Box>

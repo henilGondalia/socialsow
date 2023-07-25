@@ -7,21 +7,20 @@ import FriendListWidget from "screens/widgets/FriendListWidget";
 import MyPostWidget from "screens/widgets/MyPostWidget";
 import PostsWidget from "screens/widgets/PostsWidget";
 import UserWidget from "screens/widgets/UserWidget";
-import { configUrl } from "config";
+import useApi from "customHooks/useApi";
 
 const ProfilePage = () => {
   const [user, setUser] = useState(null);
   const { userId } = useParams();
   const token = useSelector((state) => state.token);
   const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
+  const { fetchData } = useApi();
 
   const getUser = async () => {
-    const response = await fetch(`${configUrl}/users/${userId}`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await response.json();
-    setUser(data);
+    const data = await fetchData(`users/${userId}`, "GET", null, token);
+    if (data) {
+      setUser(data);
+    }
   };
 
   useEffect(() => {

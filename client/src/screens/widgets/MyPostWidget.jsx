@@ -16,6 +16,7 @@ import {
   Button,
   IconButton,
   useMediaQuery,
+  CircularProgress,
 } from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Dropzone from "react-dropzone";
@@ -24,7 +25,7 @@ import WidgetWrapper from "components/WidgetWrapper";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPosts } from "state";
-import { configUrl } from "config";
+import useApi from "customHooks/useApi";
 
 const MyPostWidget = ({ picturePath }) => {
   const dispatch = useDispatch();
@@ -34,9 +35,18 @@ const MyPostWidget = ({ picturePath }) => {
   const { palette } = useTheme();
   const { _id } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
+  const { fetchData } = useApi();
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
   const mediumMain = palette.neutral.mediumMain;
   const medium = palette.neutral.medium;
+  const MAX_POST_LENGTH = 100;
+
+  const handlePostChange = (e) => {
+    const value = e.target.value;
+    if (value.length <= MAX_POST_LENGTH) {
+      setPost(value);
+    }
+  };
 
   const handlePost = async () => {
     const formData = new FormData();
@@ -47,16 +57,20 @@ const MyPostWidget = ({ picturePath }) => {
       formData.append("picturePath", image.name);
     }
 
-    const response = await fetch(`${configUrl}/posts`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
-    const posts = await response.json();
-    dispatch(setPosts({ posts }));
-    setImage(null);
-    setPost("");
-    setIsImage(false);
+    const posts = await fetchData(`posts`, "POST", formData, token);
+    if (posts) {
+      dispatch(setPosts({ posts }));
+      setImage(null);
+      setPost("");
+      setIsImage(false);
+    }
+  };
+
+  const getRemainingPercentage = () => {
+    return (
+      100 -
+      Math.round(((MAX_POST_LENGTH - post.length) / MAX_POST_LENGTH) * 100)
+    );
   };
 
   return (
@@ -65,7 +79,7 @@ const MyPostWidget = ({ picturePath }) => {
         <UserImage image={picturePath} />
         <InputBase
           placeholder="What's on your mind..."
-          onChange={(e) => setPost(e.target.value)}
+          onChange={(e) => handlePostChange(e)}
           value={post}
           sx={{
             width: "100%",
@@ -74,6 +88,34 @@ const MyPostWidget = ({ picturePath }) => {
             padding: "1rem 2rem",
           }}
         />
+        {getRemainingPercentage() > 50 && (
+          <Box sx={{ position: "relative", display: "inline-flex" }}>
+            <CircularProgress
+              variant="determinate"
+              value={getRemainingPercentage()}
+            />
+            <Box
+              sx={{
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+                position: "absolute",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography
+                variant="caption"
+                component="div"
+                color="text.secondary"
+              >
+                {`${getRemainingPercentage()}%`}
+              </Typography>
+            </Box>
+          </Box>
+        )}
       </FlexBetween>
       {isImage && (
         <Box
@@ -109,7 +151,7 @@ const MyPostWidget = ({ picturePath }) => {
                 {image && (
                   <IconButton
                     onClick={() => setImage(null)}
-                    sx={{ width: "15%" }}
+                    sx={{ width: "8%", marginLeft: "2%" }}
                   >
                     <DeleteOutlined />
                   </IconButton>

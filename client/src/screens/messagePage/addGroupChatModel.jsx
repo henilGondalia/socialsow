@@ -7,7 +7,7 @@ import SearchBar from "components/SearchBar";
 import MyChats from "components/MyChats";
 import MyChatSkelton from "components/MyChatSkelton";
 import ModelWrapper from "components/ModelWrapper";
-import { configUrl } from "config";
+import useApi from "customHooks/useApi";
 
 const ChatModel = ({ newChatOpen, setNewChatOpen, accessChat }) => {
   const { palette } = useTheme();
@@ -15,6 +15,7 @@ const ChatModel = ({ newChatOpen, setNewChatOpen, accessChat }) => {
   const [searchResult, setSearchResult] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   let [timer, setTimer] = useState(null);
+  const { fetchData } = useApi();
 
   const handleSearch = (e) => {
     clearTimeout(timer);
@@ -23,18 +24,15 @@ const ChatModel = ({ newChatOpen, setNewChatOpen, accessChat }) => {
       setTimeout(async () => {
         const searchString = e.target.value;
         if (searchString) {
-          const response = await fetch(
-            `${configUrl}/users?search=${searchString}`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
+          const data = await fetchData(
+            `users?search=${searchString}`,
+            "GET",
+            null,
+            token
           );
-          const data = await response.json();
-          setSearchResult(data);
-          //   setSearchResult([...data, ...data]);
+          if (data) {
+            setSearchResult(data);
+          }
         } else {
           setSearchResult(null);
         }

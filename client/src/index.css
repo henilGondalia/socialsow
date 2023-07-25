@@ -41,7 +41,8 @@ body,
 
 .bouncing-loader {
   display: flex;
-  margin-left: 1rem;
+  margin-left: 0.5rem;
+  margin-top: 1.6rem;
 }
 
 .bouncing-loader > div {

@@ -7,7 +7,7 @@ export const getUser = async (req, res) => {
     const user = await User.findById(id);
     res.status(200).json(user);
   } catch (err) {
-    res.status(404).json({ message: err.message });
+    res.status(404).json({ error: err.message });
   }
 };
 export const getUsers = async (req, res) => {
@@ -26,7 +26,7 @@ export const getUsers = async (req, res) => {
     const users = await User.find(keyword).find({ _id: { $ne: req.user.id } });
     res.status(200).json(users);
   } catch (err) {
-    res.status(404).json({ message: err.message });
+    res.status(404).json({ error: err.message });
   }
 };
 
@@ -45,7 +45,7 @@ export const getUserFriends = async (req, res) => {
     );
     res.status(200).json(formattedFriends);
   } catch (err) {
-    res.status(404).json({ message: err.message });
+    res.status(404).json({ error: err.message });
   }
 };
 
@@ -76,7 +76,7 @@ export const addRemoveFriend = async (req, res) => {
 
     res.status(200).json(formattedFriends);
   } catch (err) {
-    res.status(404).json({ message: err.message });
+    res.status(404).json({ error: err.message });
   }
 };
 
@@ -86,7 +86,7 @@ export const bookmarkPost = async (req, res) => {
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ error: 'User not found' });
     }
     // Check if the post is already bookmarked by the user
     const isBookmarked = user.bookmarks.includes(postId);
@@ -99,7 +99,7 @@ export const bookmarkPost = async (req, res) => {
     res.status(200).json(savedUser.bookmarks);
     // res.status(200).json({ message: 'Post bookmarked successfully' });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -110,7 +110,7 @@ export const getBookmarkedPosts = async (req, res) => {
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ error: 'User not found' });
     }
 
     console.log(userId, user)
@@ -120,6 +120,6 @@ export const getBookmarkedPosts = async (req, res) => {
 
     res.status(200).json(bookmarkedPosts);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
   }
 };

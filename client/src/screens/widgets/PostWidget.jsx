@@ -16,6 +16,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost, removeUnBookmarkedPost, setBookmarks } from "state";
 import { configUrl } from "config";
+import useApi from "customHooks/useApi";
 
 const PostWidget = ({
   postId,
@@ -36,41 +37,37 @@ const PostWidget = ({
   const bookmarkedPosts = useSelector((state) => state.user.bookmarks);
   const isLiked = Boolean(likes[loggedInUserId]);
   const likeCount = Object.keys(likes).length;
+  const { fetchData } = useApi();
 
   const { palette } = useTheme();
   const main = palette.neutral.main;
   const primary = palette.primary.main;
 
   const patchLike = async () => {
-    const response = await fetch(`${configUrl}/posts/${postId}/like`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId: loggedInUserId }),
-    });
-    const updatedPost = await response.json();
-    dispatch(setPost({ post: updatedPost }));
+    const data = await fetchData(
+      `posts/${postId}/like`,
+      "PATCH",
+      { userId: loggedInUserId },
+      token
+    );
+    if (data) {
+      dispatch(setPost({ post: data }));
+    }
   };
 
   const bookMarkPost = async () => {
-    const response = await fetch(
-      `${configUrl}/users/${loggedInUserId}/bookmark`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId: loggedInUserId, postId: postId }),
-      }
+    const data = await fetchData(
+      `users/${loggedInUserId}/bookmark`,
+      "POST",
+      { userId: loggedInUserId, postId: postId },
+      token
     );
-    const updatedBookMark = await response.json();
-    if (page === "isSaved") {
-      dispatch(removeUnBookmarkedPost({ postId: postId }));
+    if (data) {
+      if (page === "isSaved") {
+        dispatch(removeUnBookmarkedPost({ postId: postId }));
+      }
+      dispatch(setBookmarks({ bookmarks: data }));
     }
-    dispatch(setBookmarks({ bookmarks: updatedBookMark }));
   };
 
   const isPostBookmarked = (postId) => {

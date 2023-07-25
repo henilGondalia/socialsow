@@ -26,6 +26,7 @@ import { useNavigate } from "react-router-dom";
 import FlexBetween from "components/FlexBetween";
 import SearchBar from "components/SearchBar";
 import BasicMenu from "components/BasicMenu";
+import MySnackbar from "components/MySnackBar";
 
 const Navbar = () => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false);
@@ -56,119 +57,31 @@ const Navbar = () => {
   };
 
   return (
-    <FlexBetween padding="1rem 6%" backgroundColor={alt}>
-      <FlexBetween gap="1.75rem">
-        <Typography
-          fontWeight="bold"
-          fontSize="clamp(1rem, 2rem, 2.25rem)"
-          color="primary"
-          onClick={() => navigate("/home")}
-          sx={{
-            "&:hover": {
-              color: primaryLight,
-              cursor: "pointer",
-            },
-          }}
-        >
-          SociolSow
-        </Typography>
-        {isNonMobileScreens && <SearchBar />}
-      </FlexBetween>
-
-      {/* DESKTOP NAV */}
-      {isNonMobileScreens ? (
-        <FlexBetween gap="2rem">
-          <IconButton onClick={() => dispatch(setMode())}>
-            {theme.palette.mode === "dark" ? (
-              <DarkMode sx={{ fontSize: "25px" }} />
-            ) : (
-              <LightMode sx={{ color: dark, fontSize: "25px" }} />
-            )}
-          </IconButton>
-          <IconButton onClick={() => navigate(`/messages/${user._id}`)}>
-            <Message sx={{ fontSize: "25px" }} />
-          </IconButton>
-          <IconButton anchorel={anchorNotofication} onClick={handleOpen}>
-            <Badge badgeContent={notifications.length} color="primary">
-              <Notifications sx={{ fontSize: "25px" }} />
-            </Badge>
-          </IconButton>
-          <BasicMenu
-            open={open}
-            anchorEl={anchorNotofication}
-            handleClose={handleClose}
-            notifications={notifications}
-          />
-          <Help sx={{ fontSize: "25px" }} />
-          <FormControl variant="standard" value={fullName}>
-            <Select
-              value={fullName}
-              sx={{
-                backgroundColor: neutralLight,
-                width: "150px",
-                borderRadius: "0.25rem",
-                p: "0.25rem 1rem",
-                "& .MuiSvgIcon-root": {
-                  pr: "0.25rem",
-                  width: "3rem",
-                },
-                "& .MuiSelect-select:focus": {
-                  backgroundColor: neutralLight,
-                },
-              }}
-              input={<InputBase />}
-            >
-              <MenuItem value={fullName}>
-                <Typography>{fullName}</Typography>
-              </MenuItem>
-              <MenuItem onClick={() => navigate(`/saved/${user._id}`)}>
-                Saved
-              </MenuItem>
-              <MenuItem onClick={() => dispatch(setLogout())}>Log Out</MenuItem>
-            </Select>
-          </FormControl>
-        </FlexBetween>
-      ) : (
-        <IconButton
-          onClick={() => setIsMobileMenuToggled(!isMobileMenuToggled)}
-        >
-          <Menu />
-        </IconButton>
-      )}
-
-      {/* MOBILE NAV */}
-      {!isNonMobileScreens && isMobileMenuToggled && (
-        <Box
-          position="fixed"
-          right="0"
-          bottom="0"
-          height="100%"
-          zIndex="10"
-          maxWidth="500px"
-          minWidth="300px"
-          backgroundColor={background}
-        >
-          {/* CLOSE ICON */}
-          <Box display="flex" justifyContent="flex-end" p="1rem">
-            <IconButton
-              onClick={() => setIsMobileMenuToggled(!isMobileMenuToggled)}
-            >
-              <Close />
-            </IconButton>
-          </Box>
-
-          {/* MENU ITEMS */}
-          <FlexBetween
-            display="flex"
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            gap="3rem"
+    <>
+      <MySnackbar />
+      <FlexBetween padding="1rem 6%" backgroundColor={alt}>
+        <FlexBetween gap="1.75rem">
+          <Typography
+            fontWeight="bold"
+            fontSize="clamp(1rem, 2rem, 2.25rem)"
+            color="primary"
+            onClick={() => navigate("/home")}
+            sx={{
+              "&:hover": {
+                color: primaryLight,
+                cursor: "pointer",
+              },
+            }}
           >
-            <IconButton
-              onClick={() => dispatch(setMode())}
-              sx={{ fontSize: "25px" }}
-            >
+            SociolSow
+          </Typography>
+          {isNonMobileScreens && <SearchBar />}
+        </FlexBetween>
+
+        {/* DESKTOP NAV */}
+        {isNonMobileScreens ? (
+          <FlexBetween gap="2rem">
+            <IconButton onClick={() => dispatch(setMode())}>
               {theme.palette.mode === "dark" ? (
                 <DarkMode sx={{ fontSize: "25px" }} />
               ) : (
@@ -179,7 +92,7 @@ const Navbar = () => {
               <Message sx={{ fontSize: "25px" }} />
             </IconButton>
             <IconButton anchorel={anchorNotofication} onClick={handleOpen}>
-              <Badge badgeContent={notifications.length} color="secondary">
+              <Badge badgeContent={notifications.length} color="primary">
                 <Notifications sx={{ fontSize: "25px" }} />
               </Badge>
             </IconButton>
@@ -209,7 +122,12 @@ const Navbar = () => {
                 input={<InputBase />}
               >
                 <MenuItem value={fullName}>
-                  <Typography>{fullName}</Typography>
+                  <Typography overflow="hidden" textOverflow="ellipsis">
+                    {fullName}
+                  </Typography>
+                </MenuItem>
+                <MenuItem onClick={() => navigate(`/saved/${user._id}`)}>
+                  Saved
                 </MenuItem>
                 <MenuItem onClick={() => dispatch(setLogout())}>
                   Log Out
@@ -217,9 +135,104 @@ const Navbar = () => {
               </Select>
             </FormControl>
           </FlexBetween>
-        </Box>
-      )}
-    </FlexBetween>
+        ) : (
+          <IconButton
+            onClick={() => setIsMobileMenuToggled(!isMobileMenuToggled)}
+          >
+            <Menu />
+          </IconButton>
+        )}
+
+        {/* MOBILE NAV */}
+        {!isNonMobileScreens && isMobileMenuToggled && (
+          <Box
+            position="fixed"
+            right="0"
+            bottom="0"
+            height="100%"
+            zIndex="10"
+            maxWidth="500px"
+            minWidth="300px"
+            backgroundColor={background}
+          >
+            {/* CLOSE ICON */}
+            <Box display="flex" justifyContent="flex-end" p="1rem">
+              <IconButton
+                onClick={() => setIsMobileMenuToggled(!isMobileMenuToggled)}
+              >
+                <Close />
+              </IconButton>
+            </Box>
+
+            {/* MENU ITEMS */}
+            <FlexBetween
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+              gap="3rem"
+            >
+              <IconButton
+                onClick={() => dispatch(setMode())}
+                sx={{ fontSize: "25px" }}
+              >
+                {theme.palette.mode === "dark" ? (
+                  <DarkMode sx={{ fontSize: "25px" }} />
+                ) : (
+                  <LightMode sx={{ color: dark, fontSize: "25px" }} />
+                )}
+              </IconButton>
+              <IconButton onClick={() => navigate(`/messages/${user._id}`)}>
+                <Message sx={{ fontSize: "25px" }} />
+              </IconButton>
+              <IconButton anchorel={anchorNotofication} onClick={handleOpen}>
+                <Badge badgeContent={notifications.length} color="primary">
+                  <Notifications sx={{ fontSize: "25px" }} />
+                </Badge>
+              </IconButton>
+              <BasicMenu
+                open={open}
+                anchorEl={anchorNotofication}
+                handleClose={handleClose}
+                notifications={notifications}
+              />
+              <Help sx={{ fontSize: "25px" }} />
+              <FormControl variant="standard" value={fullName}>
+                <Select
+                  value={fullName}
+                  sx={{
+                    backgroundColor: neutralLight,
+                    width: "150px",
+                    borderRadius: "0.25rem",
+                    p: "0.25rem 1rem",
+                    "& .MuiSvgIcon-root": {
+                      pr: "0.25rem",
+                      width: "3rem",
+                    },
+                    "& .MuiSelect-select:focus": {
+                      backgroundColor: neutralLight,
+                    },
+                  }}
+                  input={<InputBase />}
+                >
+                  <MenuItem value={fullName}>
+                    <Typography overflow="hidden" textOverflow="ellipsis">
+                      {fullName}
+                    </Typography>
+                  </MenuItem>
+                  <MenuItem onClick={() => navigate(`/saved/${user._id}`)}>
+                    Saved
+                  </MenuItem>
+                  <MenuItem onClick={() => dispatch(setLogout())}>
+                    Log Out
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </FlexBetween>
+          </Box>
+        )}
+      </FlexBetween>
+    </>
   );
 };
 

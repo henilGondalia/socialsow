@@ -6,10 +6,11 @@ import MyChatsWidget from "screens/widgets/MyChatsWidget";
 import ChatBoxWidget from "screens/widgets/ChatBoxWidget";
 import ChatModel from "./addChatModel";
 import EditChatModel from "./editChatModel";
-import { configUrl } from "config";
+import useApi from "customHooks/useApi";
 
 const MessagePage = () => {
   const token = useSelector((state) => state.token);
+  // const dispatch = useDispatch();
   const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
   const [chats, setChats] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
@@ -17,37 +18,33 @@ const MessagePage = () => {
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const [group, seGroup] = useState([]);
   const [editChat, setEditChat] = useState(false);
+  const { fetchData } = useApi();
 
   const fetchChats = async () => {
-    const response = await fetch(`${configUrl}/chat`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    const data = await response.json();
-    setChats(data);
+    const data = await fetchData(`chat`, "GET", null, token);
+    if (data) {
+      setChats(data);
+    }
     // dispatch(setChats({ Chats: data }));
   };
 
   const accessChat = async (chat) => {
     if (chat && chat._id) {
-      const response = await fetch(`${configUrl}/chat`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const data = await fetchData(
+        `chat`,
+        "POST",
+        {
           userId: chat._id,
-        }),
-      });
-      const data = await response.json();
-      if (!chats.find((c) => c._id === data._id)) {
-        setChats([data, ...chats]);
+        },
+        token
+      );
+      if (data) {
+        if (!chats.find((c) => c._id === data._id)) {
+          setChats([data, ...chats]);
+        }
+        setSelectedChat(data);
+        setNewChatOpen(false);
       }
-      setSelectedChat(data);
-      setNewChatOpen(false);
     }
   };
 
@@ -62,31 +59,24 @@ const MessagePage = () => {
       if (chatId) {
         body["chatId"] = chatId;
       }
-      const response = await fetch(`${configUrl}/chat/group`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-      const data = await response.json();
-      if (chats.find((c) => c._id === data._id)) {
-        const updateChatIndex = chats.findIndex((c) => c._id === data._id);
-        let newChats = chats;
-        newChats[updateChatIndex] = data;
-        setChats([...newChats]);
-      } else {
-        setChats([data, ...chats]);
+      const data = await fetchData(`chat/group`, "POST", body, token);
+      if (data) {
+        if (chats.find((c) => c._id === data._id)) {
+          const updateChatIndex = chats.findIndex((c) => c._id === data._id);
+          let newChats = chats;
+          newChats[updateChatIndex] = data;
+          setChats([...newChats]);
+        } else {
+          setChats([data, ...chats]);
+        }
+        setSelectedChat(data);
+        setNewChatOpen(false);
+        setEditChat(false);
       }
-      setSelectedChat(data);
-      setNewChatOpen(false);
-      setEditChat(false);
     }
   };
 
   const handleGroup = (chat) => {
-    debugger;
     const isAvailable = group.filter((member) => member._id === chat._id);
     if (!isAvailable.length) {
       seGroup([...group, chat]);
@@ -141,6 +131,7 @@ const MessagePage = () => {
         >
           <ChatBoxWidget
             selectedChat={selectedChat}
+            setSelectedChat={setSelectedChat}
             setNewChatOpen={setNewChatOpen}
             setEditChat={setEditChat}
           />

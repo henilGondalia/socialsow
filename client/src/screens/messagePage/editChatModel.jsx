@@ -13,7 +13,9 @@ import SearchBar from "components/SearchBar";
 import MyChats from "components/MyChats";
 import MyChatSkelton from "components/MyChatSkelton";
 import ModelWrapper from "components/ModelWrapper";
+import UserWidget from "screens/widgets/UserWidget";
 import { configUrl } from "config";
+import useApi from "customHooks/useApi";
 
 const EditChatModel = ({
   editChat,
@@ -32,6 +34,7 @@ const EditChatModel = ({
   const [searchLoading, setSearchLoading] = useState(false);
   const [timer, setTimer] = useState(null);
   const [groupName, setGroupName] = useState("");
+  const { fetchData } = useApi();
 
   const handleSearch = (e) => {
     clearTimeout(timer);
@@ -40,18 +43,15 @@ const EditChatModel = ({
       setTimeout(async () => {
         const searchString = e.target.value;
         if (searchString) {
-          const response = await fetch(
-            `${configUrl}/users?search=${searchString}`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
+          const data = await fetchData(
+            `users?search=${searchString}`,
+            "GET",
+            null,
+            token
           );
-          const data = await response.json();
-          setSearchResult(data);
-          //   setSearchResult([...data, ...data]);
+          if (data) {
+            setSearchResult(data);
+          }
         } else {
           setSearchResult(null);
         }
@@ -67,7 +67,7 @@ const EditChatModel = ({
   useEffect(() => {
     console.log("selectedChat", selectedChat);
     selectedChat.users && seGroup(selectedChat.users);
-    //   setGroupName("");
+    setGroupName(selectedChat.chatName || "");
     //   setSearchResult([]);
     //   return () => {
     //     console.log("return");
@@ -85,7 +85,7 @@ const EditChatModel = ({
           : selectedChat.chatName
       }
     >
-      {selectedChat.isGroupChat && (
+      {selectedChat.isGroupChat ? (
         <>
           <Box margin="0 6% 1rem">
             <TextField
@@ -159,6 +159,13 @@ const EditChatModel = ({
             Update
           </Button>
         </>
+      ) : (
+        <Box margin="0 4% 1rem">
+          <UserWidget
+            userId={getSender(selectedChat.users)?._id}
+            picturePath={getSender(selectedChat.users)?.picturePath}
+          />
+        </Box>
       )}
     </ModelWrapper>
   );

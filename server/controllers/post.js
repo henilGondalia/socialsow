@@ -21,7 +21,7 @@ export const createPost = async (req, res) => {
     const post = await Post.find().sort({ createdAt: -1 });
     res.status(201).json(post);
   } catch (err) {
-    res.status(409).json({ message: err.message });
+    res.status(409).json({ error: err.message });
   }
 };
 
@@ -30,7 +30,7 @@ export const getFeedPosts = async (req, res) => {
     const post = await Post.find().sort({ createdAt: -1 });
     res.status(200).json(post);
   } catch (err) {
-    res.status(404).json({ message: err.message });
+    res.status(404).json({ error: err.message });
   }
 };
 
@@ -40,7 +40,7 @@ export const getUserPosts = async (req, res) => {
     const post = await Post.find({ userId }).sort({ createdAt: -1 });
     res.status(200).json(post);
   } catch (err) {
-    res.status(404).json({ message: err.message });
+    res.status(404).json({ error: err.message });
   }
 };
 
@@ -65,17 +65,17 @@ export const likePost = async (req, res) => {
 
     res.status(200).json(updatedPost);
   } catch (err) {
-    res.status(404).json({ message: err.message });
+    res.status(404).json({ error: err.message });
   }
 };
 
 export const commentPost = async (req, res) => {
   try {
     const { id } = req.params;
-    const { userId, comment, parentId} = req.body;
+    const { userId, comment, parentId } = req.body;
     const post = await Post.findById(id);
     if (!post) {
-      return res.status(404).json({ message: 'Post not found' });
+      return res.status(404).json({ error: 'Post not found' });
     }
 
     let commentData = {
@@ -86,7 +86,7 @@ export const commentPost = async (req, res) => {
       replies: [],
       parentId: parentId ? parentId : undefined,
     };
-    console.log("newComment",req.body, commentData);
+    console.log("newComment", req.body, commentData);
     const newComment = new Comment(commentData);
     const savedComment = await newComment.save();
     if (parentId) {
@@ -108,7 +108,7 @@ export const commentPost = async (req, res) => {
     const updatedPost = await Post.findById(id);
     res.status(200).json(updatedPost);
   } catch (err) {
-    res.status(404).json({ message: err.message });
+    res.status(404).json({ error: err.message });
   }
 };
 
@@ -116,10 +116,11 @@ export const deletePost = async (req, res) => {
   try {
     const { id } = req.params;
     const post = await Post.findByIdAndRemove(id);
+    await User.updateMany({ bookmarks: id }, { $pull: { bookmarks: id } });
     res.status(200).json(post);
   } catch (err) {
-    res.status(404).json({ message: err.message });
-    res.status(505).json({ message: "Failed to delete post" });
+    res.status(404).json({ error: err.message });
+    res.status(505).json({ error: "Failed to delete post" });
   }
 };
 

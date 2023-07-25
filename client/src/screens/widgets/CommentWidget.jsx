@@ -5,7 +5,7 @@ import UserImage from "components/UserImage";
 import { InputBase, useTheme, IconButton } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import { setPost } from "state";
-import { configUrl } from "config";
+import useApi from "customHooks/useApi";
 
 const CommentWidget = ({ postId, commentId }) => {
   const dispatch = useDispatch();
@@ -13,23 +13,23 @@ const CommentWidget = ({ postId, commentId }) => {
   const [comment, setComment] = useState("");
   const { palette } = useTheme();
   const { _id, picturePath } = useSelector((state) => state.user);
+  const { fetchData } = useApi();
 
   const handleComment = async () => {
-    const response = await fetch(`${configUrl}/posts/${postId}/comment`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const data = await fetchData(
+      `posts/${postId}/comment`,
+      "POST",
+      {
         userId: _id,
         comment: comment,
         parentId: commentId,
-      }),
-    });
-    const updatedPost = await response.json();
-    dispatch(setPost({ post: updatedPost }));
-    setComment("");
+      },
+      token
+    );
+    if (data) {
+      dispatch(setPost({ post: data }));
+      setComment("");
+    }
   };
 
   return (

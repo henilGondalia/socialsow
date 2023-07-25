@@ -13,18 +13,42 @@ import { Formik } from "formik";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setLogin } from "state";
+import { setLogin, showSnackBar } from "state";
 import Dropzone from "react-dropzone";
 import FlexBetween from "components/FlexBetween";
-import { configUrl } from "config";
+import useApi from "customHooks/useApi";
 
 const registerSchema = yup.object().shape({
-  firstName: yup.string().required("required"),
-  lastName: yup.string().required("required"),
-  email: yup.string().email("invalid email").required("required"),
-  password: yup.string().required("required"),
-  location: yup.string().required("required"),
-  occupation: yup.string().required("required"),
+  firstName: yup
+    .string()
+    .required("required")
+    .min(3, "Minimum 3 characters are required")
+    .max(12, "Maximum 12 characters are allowed"),
+  lastName: yup
+    .string()
+    .required("required")
+    .min(3, "Minimum 3 characters are required")
+    .max(12, "Maximum 12 characters are allowed"),
+  email: yup
+    .string()
+    .email("invalid email")
+    .required("required")
+    .max(30, "Maximum 30 characters are allowed"),
+  password: yup
+    .string()
+    .required("required")
+    .min(3, "Minimum 3 characters are required")
+    .max(12, "Maximum 12 characters are allowed"),
+  location: yup
+    .string()
+    .required("required")
+    .min(3, "Minimum 3 characters are required")
+    .max(12, "Maximum 12 characters are allowed"),
+  occupation: yup
+    .string()
+    .required("required")
+    .min(3, "Minimum 3 characters are required")
+    .max(12, "Maximum 12 characters are allowed"),
   picture: yup.string().required("required"),
 });
 
@@ -56,23 +80,17 @@ const Form = () => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const isLogin = pageType === "login";
   const isRegister = pageType === "register";
-  const [isLoading, setIsLoading] = useState(false);
+  const { loading, fetchData } = useApi();
 
   const register = async (values, onSubmitProps) => {
     // this allows us to send form info with image
-    setIsLoading(true);
     const formData = new FormData();
     for (let value in values) {
       formData.append(value, values[value]);
     }
     formData.append("picturePath", values.picture.name);
 
-    const savedUserResponse = await fetch(`${configUrl}/auth/register`, {
-      method: "POST",
-      body: formData,
-    });
-    const savedUser = await savedUserResponse.json();
-    setIsLoading(false);
+    const savedUser = await fetchData(`auth/register`, "POST", formData);
     onSubmitProps.resetForm();
 
     if (savedUser) {
@@ -81,16 +99,22 @@ const Form = () => {
   };
 
   const login = async (values, onSubmitProps) => {
-    setIsLoading(true);
-    const loggedInResponse = await fetch(`${configUrl}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
-    const loggedIn = await loggedInResponse.json();
-    setIsLoading(false);
+    await setTimeout(() => {
+      if (loading) {
+        dispatch(
+          showSnackBar({
+            showSnackBar: true,
+            serverMsg: {
+              message: "Wait... First connection takes time!",
+              severity: "success",
+            },
+          })
+        );
+      }
+    }, 2000);
+    const loggedIn = await fetchData(`auth/login`, "POST", values);
     onSubmitProps.resetForm();
-    if (loggedIn) {
+    if (loggedIn && loggedIn.token) {
       dispatch(
         setLogin({
           user: loggedIn.user,
@@ -98,6 +122,12 @@ const Form = () => {
         })
       );
       navigate("/home");
+      dispatch(
+        showSnackBar({
+          showSnackBar: true,
+          serverMsg: { message: "Successfully Logged In", severity: "success" },
+        })
+      );
     }
   };
 
@@ -249,7 +279,7 @@ const Form = () => {
                 "&:hover": { color: palette.primary.main },
               }}
             >
-              {isLoading ? (
+              {loading ? (
                 <CircularProgress color="inherit" size={24} /> // Show the loader while loading
               ) : isLogin ? (
                 "LOGIN"

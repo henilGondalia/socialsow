@@ -16,6 +16,7 @@ import SearchBar from "components/SearchBar";
 import MyChats from "components/MyChats";
 import MyChatSkelton from "components/MyChatSkelton";
 import ModelWrapper from "components/ModelWrapper";
+import useApi from "customHooks/useApi";
 import { configUrl } from "config";
 
 const ChatModel = ({
@@ -34,6 +35,7 @@ const ChatModel = ({
   const [searchLoading, setSearchLoading] = useState(false);
   const [timer, setTimer] = useState(null);
   const [groupName, setGroupName] = useState("");
+  const { fetchData } = useApi();
 
   const handleSearch = (e) => {
     clearTimeout(timer);
@@ -42,18 +44,15 @@ const ChatModel = ({
       setTimeout(async () => {
         const searchString = e.target.value;
         if (searchString) {
-          const response = await fetch(
-            `${configUrl}/users?search=${searchString}`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
+          const data = await fetchData(
+            `/users?search=${searchString}`,
+            "GET",
+            null,
+            token
           );
-          const data = await response.json();
-          setSearchResult(data);
-          //   setSearchResult([...data, ...data]);
+          if (data) {
+            setSearchResult(data);
+          }
         } else {
           setSearchResult(null);
         }
@@ -66,7 +65,7 @@ const ChatModel = ({
     setSearchResult([]);
     setGroupName("");
     setIsCreatingGroup(false);
-  }, [newChatOpen]);
+  }, [newChatOpen, setIsCreatingGroup]);
 
   return (
     <ModelWrapper

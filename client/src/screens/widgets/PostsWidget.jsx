@@ -4,41 +4,45 @@ import { setPosts } from "state";
 import PostWidget from "./PostWidget";
 import WidgetWrapper from "components/WidgetWrapper";
 import { Box, Typography } from "@mui/material";
-import { configUrl } from "config";
+import useApi from "customHooks/useApi";
 
 const PostsWidget = ({ userId, page = false }) => {
   const dispatch = useDispatch();
   const posts = useSelector((state) => state.posts);
   const token = useSelector((state) => state.token);
+  const { fetchData } = useApi();
+
   const getPosts = async () => {
-    const response = await fetch(`${configUrl}/posts`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await response.json();
-    dispatch(setPosts({ posts: data }));
+    const data = await fetchData(`posts`, "GET", null, token);
+    if (data) {
+      dispatch(setPosts({ posts: data }));
+    }
   };
 
   const getUserPosts = async () => {
-    const response = await fetch(`${configUrl}/posts/${userId}/posts`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await response.json();
-    dispatch(setPosts({ posts: data }));
+    const data = await fetchData(`posts/${userId}/posts`, "GET", null, token);
+    if (data) {
+      dispatch(setPosts({ posts: data }));
+    }
   };
 
   const getsavedPosts = async () => {
-    const savedPosts = await fetch(`${configUrl}/users/${userId}/bookmarks`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await savedPosts.json();
-    dispatch(setPosts({ posts: data }));
+    const data = await fetchData(
+      `users/${userId}/bookmarks`,
+      "GET",
+      null,
+      token
+    );
+    if (data) {
+      dispatch(setPosts({ posts: data }));
+    }
   };
 
   useEffect(() => {
     loadData();
+    return () => {
+      dispatch(setPosts({ posts: [] }));
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadData = () => {

@@ -6,7 +6,7 @@ import { setFriends, UpdatePostAfterDelete } from "state";
 import FlexBetween from "./FlexBetween";
 import UserImage from "./UserImage";
 import MoreOption from "components/MoreOption";
-import { configUrl } from "config";
+import useApi from "customHooks/useApi";
 
 const Friend = ({ friendId, name, subtitle, userPicturePath, postId }) => {
   const dispatch = useDispatch();
@@ -14,6 +14,7 @@ const Friend = ({ friendId, name, subtitle, userPicturePath, postId }) => {
   const { _id } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   const friends = useSelector((state) => state.user.friends);
+  const { fetchData } = useApi();
 
   const { palette } = useTheme();
   const primaryLight = palette.primary.light;
@@ -27,31 +28,26 @@ const Friend = ({ friendId, name, subtitle, userPicturePath, postId }) => {
   const isSelf = friendId === _id;
 
   const patchFriend = async () => {
-    const response = await fetch(`${configUrl}/users/${_id}/${friendId}`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    const data = await response.json();
-    dispatch(setFriends({ friends: data }));
+    const data = await fetchData(
+      `users/${_id}/${friendId}`,
+      "PATCH",
+      null,
+      token
+    );
+    if (data) {
+      dispatch(setFriends({ friends: data }));
+    }
   };
 
   const onClicKDelete = async () => {
-    const response = await fetch(`${configUrl}/posts/${postId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    const data = await response.json();
-    dispatch(UpdatePostAfterDelete({ post: data }));
+    const data = await fetchData(`posts/${postId}`, "DELETE", null, token);
+    if (data) {
+      dispatch(UpdatePostAfterDelete({ post: data }));
+    }
   };
 
   return (
-    <FlexBetween>
+    <FlexBetween key={friendId}>
       <FlexBetween gap="1rem">
         <UserImage image={userPicturePath} size="55px" />
         <Box

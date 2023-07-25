@@ -1,11 +1,18 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+const initialServerMsg = {
+  message: '',
+  severity: 'success'
+}
+
 const initialState = {
   mode: 'light',
   user: null,
   token: null,
   posts: [],
-  notifications: []
+  notifications: [],
+  showSnackBar: false,
+  serverMsg: initialServerMsg
 };
 
 export const authSlice = createSlice({
@@ -57,10 +64,26 @@ export const authSlice = createSlice({
     },
     setNotification: (state, action) => {
       state.notifications = action.payload.notifications
-    }
+    },
+    showSnackBar: (state, action) => {
+      state.showSnackBar = action.payload.showSnackBar
+      state.serverMsg = action.payload.serverMsg || initialServerMsg
+    },
   },
 });
 
-export const { setMode, setLogin, setLogout, setFriends, setBookmarks, setPosts, setPost, UpdatePostAfterDelete, removeUnBookmarkedPost, setNotification } =
+export const {
+  setMode,
+  setLogin,
+  setLogout,
+  setFriends,
+  setBookmarks,
+  setPosts,
+  setPost,
+  UpdatePostAfterDelete,
+  removeUnBookmarkedPost,
+  setNotification,
+  showSnackBar,
+} =
   authSlice.actions;
 export default authSlice.reducer;

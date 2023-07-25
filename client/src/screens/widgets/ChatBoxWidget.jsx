@@ -6,35 +6,41 @@ import {
   IconButton,
   useTheme,
 } from "@mui/material";
+import ArrowBackIosRoundedIcon from "@mui/icons-material/ArrowBackIosRounded";
 import { useDispatch, useSelector } from "react-redux";
 import WidgetWrapper from "components/WidgetWrapper";
 import FlexBetween from "components/FlexBetween";
 import CircularProgress from "@mui/material/CircularProgress";
 import SentimentSatisfiedAltRoundedIcon from "@mui/icons-material/SentimentSatisfiedAltRounded";
-import Snackbar from "@mui/material/Snackbar";
 // import SendIcon from "@mui/icons-material/Send";
 import MyChats from "components/MyChats";
 import { useState, useEffect } from "react";
 import { configUrl } from "config";
+import useApi from "customHooks/useApi";
 import ChatMessages from "./chatMessages";
 import io from "socket.io-client";
 import { setNotification } from "state";
 
 let socket, selectedChatCompare;
 
-const ChatBoxWidget = ({ selectedChat, setNewChatOpen, setEditChat }) => {
+const ChatBoxWidget = ({
+  selectedChat,
+  setSelectedChat,
+  setNewChatOpen,
+  setEditChat,
+}) => {
   const dispatch = useDispatch();
   const { palette } = useTheme();
   const token = useSelector((state) => state.token);
   const user = useSelector((state) => state.user);
   const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState([]);
   const [soketConnected, setSoketConnected] = useState(false);
   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [fetchAgain, setFetchAgain] = useState(false);
   const notifications = useSelector((state) => state.notifications);
+  const { loading, fetchData } = useApi();
 
   const getSender = (users) => {
     return users[0]._id === user._id ? users[1] : users[0];
@@ -103,20 +109,15 @@ const ChatBoxWidget = ({ selectedChat, setNewChatOpen, setEditChat }) => {
     if (!selectedChat) return;
 
     try {
-      setLoading(true);
-      const response = await fetch(
-        `${configUrl}/chat/message/${selectedChat._id}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-type": "application/json",
-          },
-        }
+      const data = await fetchData(
+        `chat/message/${selectedChat._id}`,
+        "GET",
+        null,
+        token
       );
-      const data = await response.json();
-      setMessages(data);
-      setLoading(false);
+      if (data) {
+        setMessages(data);
+      }
 
       socket.emit("joinChat", selectedChat._id);
     } catch (error) {}
@@ -126,30 +127,19 @@ const ChatBoxWidget = ({ selectedChat, setNewChatOpen, setEditChat }) => {
     if (event.key === "Enter" && newMessage) {
       socket.on("stopTyping", selectedChat._id);
       setTyping(false);
-      try {
-        const response = await fetch(`${configUrl}/chat/message`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-type": "application/json",
-          },
-          body: JSON.stringify({
-            content: newMessage,
-            chatId: selectedChat,
-          }),
-        });
+      const data = await fetchData(
+        `chat/message`,
+        "POST",
+        {
+          content: newMessage,
+          chatId: selectedChat,
+        },
+        token
+      );
+      if (data) {
         setNewMessage("");
-        const data = await response.json();
         socket.emit("newMessage", data);
         setMessages([...messages, data]);
-      } catch (error) {
-        <Snackbar
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          open={true}
-          onClose={false}
-          message="Failed to send the Message"
-          key="error"
-        />;
       }
     }
   };
@@ -166,25 +156,30 @@ const ChatBoxWidget = ({ selectedChat, setNewChatOpen, setEditChat }) => {
         {selectedChat ? (
           <>
             <Box sx={{ position: "absolute", width: "93%", top: "0" }}>
-              <MyChats
-                chat={selectedChat}
-                name={
-                  !selectedChat.isGroupChat
-                    ? getSender(selectedChat.users).firstName
-                    : selectedChat.chatName
-                }
-                profilePic={
-                  !selectedChat.isGroupChat
-                    ? getSender(selectedChat.users).picturePath
-                    : "team.png"
-                }
-                key={selectedChat._id}
-                selectedChat={null}
-                setSelectedChat={() => setEditChat(true)}
-                size="35px"
-              />
+              <FlexBetween gap="0.1rem">
+                <IconButton onClick={() => setSelectedChat(null)}>
+                  <ArrowBackIosRoundedIcon />
+                </IconButton>
+                <MyChats
+                  chat={selectedChat}
+                  name={
+                    !selectedChat.isGroupChat
+                      ? getSender(selectedChat.users).firstName
+                      : selectedChat.chatName
+                  }
+                  profilePic={
+                    !selectedChat.isGroupChat
+                      ? getSender(selectedChat.users).picturePath
+                      : "team.png"
+                  }
+                  key={selectedChat._id}
+                  selectedChat={null}
+                  setSelectedChat={() => setEditChat(true)}
+                  size="35px"
+                />
+              </FlexBetween>
             </Box>
-            <Box height="calc(100vh - 14rem )">
+            <Box height="calc(100vh - 17rem )" marginTop="3rem">
               {loading ? (
                 <Box
                   position="absolute"

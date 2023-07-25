@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
 import UserImage from "./UserImage";
-import { configUrl } from "config";
+import useApi from "customHooks/useApi";
 // import CommentWidget from "../screens/widgets/CommentWidget";
 
 const Comment = ({ userId, commentId, comment, postId, key }) => {
@@ -14,18 +14,17 @@ const Comment = ({ userId, commentId, comment, postId, key }) => {
   const navigate = useNavigate();
   const token = useSelector((state) => state.token);
   // const { _id } = useSelector((state) => state.user);
+  const { fetchData } = useApi();
 
   const { palette } = useTheme();
   const main = palette.neutral.main;
   const medium = palette.neutral.medium;
 
   const getUser = async () => {
-    const response = await fetch(`${configUrl}/users/${userId}`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await response.json();
-    setUser(data);
+    const data = await fetchData(`users/${userId}`, "GET", null, token);
+    if (data) {
+      setUser(data);
+    }
   };
 
   useEffect(() => {

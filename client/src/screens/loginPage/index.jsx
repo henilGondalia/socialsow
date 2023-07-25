@@ -1,11 +1,13 @@
-import { Box, Typography, useTheme, useMediaQuery } from '@mui/material';
-import Form from './Form';
+import { Box, Typography, useTheme, useMediaQuery } from "@mui/material";
+import Form from "./Form";
+import MySnackbar from "components/MySnackBar";
 
 const LoginPage = () => {
   const theme = useTheme();
-  const isNonMobileScreens = useMediaQuery('(min-width: 1000px)');
+  const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
   return (
     <Box>
+      <MySnackbar />
       <Box
         width="100%"
         backgroundColor={theme.palette.background.alt}

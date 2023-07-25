@@ -84,7 +84,8 @@ mongoose
     const io = new Server(server, {
       pingTimeout: 60000,
       cors: {
-        origin: "http://localhost:3000",
+        origin: "https://socialsow.netlify.app",
+        // origin: "http://localhost:3000",
       },
     })
     io.on("connection", (socket) => {

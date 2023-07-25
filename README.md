@@ -15,10 +15,10 @@ SocialSow is a project inspired by [ED Roh's tutorial](https://youtu.be/K8YELRmU
 - Responsive design: A mobile-friendly interface for seamless usage on any device with Light/dark mode toggle
 - User authentication: Sign up, log in, and log out securely using JWT token.
 - Post creation and interaction: Create posts, like, comment, and save your favorite posts.
+- Direct messaging: Enable users to communicate with each other privately.
 
 ## Next Planned Features
 
-- Direct messaging: Enable users to communicate with each other privately.
 - Post interaction: Enable users share posts via message.
 - User profile management: Edit profile information and update profile picture
 - Search functionality: Search for posts and users within the platform.

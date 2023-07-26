@@ -8,7 +8,6 @@ const ChatMessages = ({ messages, isTyping }) => {
   const { palette } = useTheme();
 
   const isSameUser = (messages, message, index) => {
-    // console.log(i === messages.length - 1);
     return (
       index !== 0 &&
       index - 1 >= 0 &&

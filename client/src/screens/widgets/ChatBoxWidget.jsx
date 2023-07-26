@@ -40,7 +40,8 @@ const ChatBoxWidget = ({
   const [isTyping, setIsTyping] = useState(false);
   const [fetchAgain, setFetchAgain] = useState(false);
   const notifications = useSelector((state) => state.notifications);
-  const { loading, fetchData } = useApi();
+  const [loading, setLoading] = useState(false);
+  const { fetchData } = useApi();
 
   const getSender = (users) => {
     return users[0]._id === user._id ? users[1] : users[0];
@@ -53,8 +54,6 @@ const ChatBoxWidget = ({
     socket.on("typing", () => setIsTyping(true));
     socket.on("stopTyping", () => setIsTyping(false));
   }, [user]);
-
-  console.log("------------", notifications);
 
   useEffect(() => {
     socket.on("messageRecieved", (newMessageRecieved) => {
@@ -107,8 +106,8 @@ const ChatBoxWidget = ({
 
   const fetchMessages = async () => {
     if (!selectedChat) return;
-
     try {
+      setLoading(true);
       const data = await fetchData(
         `chat/message/${selectedChat._id}`,
         "GET",
@@ -118,9 +117,11 @@ const ChatBoxWidget = ({
       if (data) {
         setMessages(data);
       }
-
+      setLoading(false);
       socket.emit("joinChat", selectedChat._id);
-    } catch (error) {}
+    } catch (error) {
+      setLoading(false);
+    }
   };
 
   const sendMessage = async (event) => {

@@ -65,13 +65,9 @@ const EditChatModel = ({
   };
 
   useEffect(() => {
-    console.log("selectedChat", selectedChat);
     selectedChat.users && seGroup(selectedChat.users);
     setGroupName(selectedChat.chatName || "");
-    //   setSearchResult([]);
-    //   return () => {
-    //     console.log("return");
-    //   };
+    setSearchResult([]);
   }, [editChat, selectedChat, seGroup]);
 
   return (

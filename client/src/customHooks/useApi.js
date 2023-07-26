@@ -11,7 +11,6 @@ const useApi = () => {
 
   const fetchData = async (url, method, body, token) => {
     try {
-      debugger;
       setLoading(true);
       setError(null);
 

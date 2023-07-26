@@ -78,7 +78,7 @@ export const accessGroupChat = async (req, res) => {
             }
 
             // Check if the user is a group admin
-            if (chat.groupAdmin.equals(req.user.id)) {
+            if (!chat.groupAdmin.equals(req.user.id)) {
                 return res.status(403).json({ error: "Cannot update group chat. User is not authorized." });
             }
 

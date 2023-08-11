@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 import HomePage from 'screens/homePage';
+import LandingPage from 'screens/landingPage';
 import LoginPage from 'screens/loginPage';
 import ProfilePage from 'screens/profilePage';
 import SavedPage from 'screens/savedPage';
@@ -21,22 +22,23 @@ function App() {
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Routes>
-            <Route path="/" element={<LoginPage />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/welcome" element={<LoginPage />} />
             <Route
               path="/home"
-              element={isAuth ? <HomePage /> : <Navigate to="/" />}
+              element={isAuth ? <HomePage /> : <Navigate to="/welcome" />}
             />
             <Route
               path="/profile/:userId"
-              element={isAuth ? <ProfilePage /> : <Navigate to="/" />}
+              element={isAuth ? <ProfilePage /> : <Navigate to="/welcome" />}
             />
-             <Route
+            <Route
               path="/saved/:userId"
-              element={isAuth ? <SavedPage /> : <Navigate to="/" />}
+              element={isAuth ? <SavedPage /> : <Navigate to="/welcome" />}
             />
             <Route
               path="/messages/:userId"
-              element={isAuth ? <MessagePage /> : <Navigate to="/" />}
+              element={isAuth ? <MessagePage /> : <Navigate to="/welcome" />}
             />
           </Routes>
         </ThemeProvider>

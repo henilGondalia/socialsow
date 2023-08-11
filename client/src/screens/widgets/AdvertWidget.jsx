@@ -20,7 +20,8 @@ const AdvertWidget = () => {
       <img
         width="100%"
         height="auto"
-        alt="advert"crossOrigin="anonymous"
+        alt="advert"
+        crossOrigin="anonymous"
         src={`${configUrl}/assets/info4.jpeg`}
         style={{ borderRadius: "0.75rem", margin: "0.75rem 0" }}
       />

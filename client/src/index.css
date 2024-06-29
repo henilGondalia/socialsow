@@ -152,3 +152,12 @@ body,
   font-size: 20vw;
   font-family: Founder;
 }
+
+.dot::before {
+  content: "";
+  background: #00D5FA;
+  height: 0.4em;
+  width: 0.4em;
+  display: inline-block;
+  border-radius: 50%;
+}

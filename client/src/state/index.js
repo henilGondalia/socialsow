@@ -12,7 +12,8 @@ const initialState = {
   posts: [],
   notifications: [],
   showSnackBar: false,
-  serverMsg: initialServerMsg
+  serverMsg: initialServerMsg,
+  isSearching: false
 };
 
 export const authSlice = createSlice({
@@ -21,6 +22,10 @@ export const authSlice = createSlice({
   reducers: {
     setMode: (state) => {
       state.mode = state.mode === 'light' ? 'dark' : 'light';
+    },
+    setIsSearching: (state, action) => {
+      console.log("set",state.isSearching,action.payload.isSearching)
+      state.isSearching = action.payload.isSearching;
     },
     setLogin: (state, action) => {
       state.user = action.payload.user;
@@ -65,6 +70,11 @@ export const authSlice = createSlice({
     setNotification: (state, action) => {
       state.notifications = action.payload.notifications
     },
+    updateNotifications: (state, action) => {
+      const updatedNotifications = state.notifications.filter((notification) => notification._id !== action.payload.notificationId);
+      console.log("notificationId", updatedNotifications, state.notifications, action.payload)
+      state.notifications = updatedNotifications;
+    },
     showSnackBar: (state, action) => {
       state.showSnackBar = action.payload.showSnackBar
       state.serverMsg = action.payload.serverMsg || initialServerMsg
@@ -83,7 +93,9 @@ export const {
   UpdatePostAfterDelete,
   removeUnBookmarkedPost,
   setNotification,
+  updateNotifications,
   showSnackBar,
+  setIsSearching
 } =
   authSlice.actions;
 export default authSlice.reducer;

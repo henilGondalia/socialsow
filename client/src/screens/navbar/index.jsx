@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   IconButton,
@@ -21,12 +21,14 @@ import {
   Close,
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
-import { setMode, setLogout } from "state";
+import { setMode, setLogout, updateNotifications,setIsSearching } from "state";
 import { useNavigate } from "react-router-dom";
 import FlexBetween from "components/FlexBetween";
 import SearchBar from "components/SearchBar";
 import BasicMenu from "components/BasicMenu";
 import MySnackbar from "components/MySnackBar";
+import useApi from "customHooks/useApi";
+
 
 const Navbar = () => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false);
@@ -37,6 +39,12 @@ const Navbar = () => {
   const user = useSelector((state) => state.user);
   const notifications = useSelector((state) => state.notifications);
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
+  const [searchResult, setSearchResult] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [timer, setTimer] = useState(null);
+  const token = useSelector((state) => state.token);
+  const isSearching = useSelector((state) => state.isSearching);
+  const { fetchData } = useApi();
 
   const theme = useTheme();
   const neutralLight = theme.palette.neutral.light;
@@ -52,9 +60,45 @@ const Navbar = () => {
     setOpen(true);
   };
 
-  const handleClose = () => {
+  const handleClose = (notificationId) => {
+    if(notificationId && typeof notificationId === "string"){
+      dispatch(updateNotifications(notificationId));
+      navigate(`/messages/${user._id}`);
+    }
     setOpen(false);
   };
+  
+  const onSearch = (e) => {
+    clearTimeout(timer);
+    setSearchLoading(true);
+    setTimer(
+      setTimeout(async () => {
+        const searchString = e.target.value;
+        if (searchString) {
+          const data = await fetchData(
+            `users?search=${searchString}`,
+            "GET",
+            null,
+            token
+          );
+          if (data) {
+            setSearchResult(data);
+          }
+        } else {
+          setSearchResult([]);
+        }
+      }, 1000)
+    );
+    setSearchLoading(false);
+  }
+
+  useEffect(()=>{
+    if(searchResult.length > 0){
+      dispatch(setIsSearching({isSearching:true}));
+    }else{
+      dispatch(setIsSearching({isSearching:false}));
+    }
+  },[searchResult])
 
   return (
     <>
@@ -75,7 +119,7 @@ const Navbar = () => {
           >
             SociolSow
           </Typography>
-          {isNonMobileScreens && <SearchBar />}
+          {isNonMobileScreens && <SearchBar onSearch={onSearch} searchResult={searchResult}/>}
         </FlexBetween>
 
         {/* DESKTOP NAV */}
@@ -232,6 +276,14 @@ const Navbar = () => {
           </Box>
         )}
       </FlexBetween>
+      {isSearching && (<Box sx={{
+        background: "rgba(0, 0, 0, .7)",
+        position: "fixed",
+        width: "-webkit-fill-available",
+        height: "-webkit-fill-available",
+        zIndex: "1"
+        
+      }}/>)}
     </>
   );
 };

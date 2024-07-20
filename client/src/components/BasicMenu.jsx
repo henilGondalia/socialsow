@@ -36,7 +36,7 @@ export default function BasicMenu({
       ) : (
         notifications.map((notification) => {
           return (
-            <MenuItem onClick={handleClose} key={notification._id}>
+            <MenuItem onClick={() => handleClose(notification._id)} key={notification._id}>
               {notification.chat.isGroupChat
                 ? `New Message in ${notification.chat.chatName}`
                 : `New Message from ${

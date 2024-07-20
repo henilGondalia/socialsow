@@ -46,7 +46,7 @@ const ChatModel = ({
         if (searchString) {
           const data = await fetchData(
             `users?search=${searchString}`,
-            "GET",
+            "GET", 
             null,
             token
           );

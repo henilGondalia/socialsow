@@ -99,8 +99,9 @@ const Form = () => {
   };
 
   const login = async (values, onSubmitProps) => {
+    const loggedIn = await fetchData(`auth/login`, "POST", values);
     await setTimeout(() => {
-      if (loading) {
+      if(loading) {
         dispatch(
           showSnackBar({
             showSnackBar: true,
@@ -111,8 +112,7 @@ const Form = () => {
           })
         );
       }
-    }, 2000);
-    const loggedIn = await fetchData(`auth/login`, "POST", values);
+    }, 3000);
     onSubmitProps.resetForm();
     if (loggedIn && loggedIn.token) {
       dispatch(

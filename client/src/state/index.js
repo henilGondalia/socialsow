@@ -24,7 +24,6 @@ export const authSlice = createSlice({
       state.mode = state.mode === 'light' ? 'dark' : 'light';
     },
     setIsSearching: (state, action) => {
-      console.log("set",state.isSearching,action.payload.isSearching)
       state.isSearching = action.payload.isSearching;
     },
     setLogin: (state, action) => {

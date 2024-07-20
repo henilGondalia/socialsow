@@ -5,11 +5,12 @@ import FlexBetween from "./FlexBetween";
 import FlexStart from "./FlexStart";
 import WidgetWrapper from "components/WidgetWrapper";
 import UserImage from "components/UserImage";
-import { margin } from "@mui/system";
+import { useNavigate } from "react-router-dom";
 
 
 const SearchBar = ({ onSearch = () => {}, searchResult }) => {
   const { palette } = useTheme();
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -34,12 +35,14 @@ const SearchBar = ({ onSearch = () => {}, searchResult }) => {
           <Search />
         </IconButton>
       </FlexBetween>
-      {console.log("searchResult",searchResult.map((result,index)=>{console.log(result)}))}
       {searchResult && searchResult.length > 0 && (
         <WidgetWrapper  sx={{ width: "100%", position: "absolute", zIndex:"2"}}>
           {searchResult.map((result,index)=> {
             return (
-              <FlexBetween key={index} sx={{margin: "1rem 0"}}>
+              <FlexBetween key={index} sx={{margin: "1rem 0", cursor: "pointer"}} onClick={() => {
+                navigate(`/profile/${result._id}`);
+                navigate(0);
+              }}>
                 <FlexStart>
                   <Typography fontSize="1rem" fontWeight="500" marginRight="0.2em">
                     {result.firstName}

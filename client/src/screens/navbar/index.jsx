@@ -40,7 +40,7 @@ const Navbar = () => {
   const notifications = useSelector((state) => state.notifications);
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
   const [searchResult, setSearchResult] = useState([]);
-  const [searchLoading, setSearchLoading] = useState(false);
+  // const [searchLoading, setSearchLoading] = useState(false);
   const [timer, setTimer] = useState(null);
   const token = useSelector((state) => state.token);
   const isSearching = useSelector((state) => state.isSearching);
@@ -70,7 +70,7 @@ const Navbar = () => {
   
   const onSearch = (e) => {
     clearTimeout(timer);
-    setSearchLoading(true);
+    // setSearchLoading(true);
     setTimer(
       setTimeout(async () => {
         const searchString = e.target.value;
@@ -89,7 +89,7 @@ const Navbar = () => {
         }
       }, 1000)
     );
-    setSearchLoading(false);
+    // setSearchLoading(false);
   }
 
   useEffect(()=>{
@@ -98,7 +98,7 @@ const Navbar = () => {
     }else{
       dispatch(setIsSearching({isSearching:false}));
     }
-  },[searchResult])
+  },[searchResult,dispatch])
 
   return (
     <>
